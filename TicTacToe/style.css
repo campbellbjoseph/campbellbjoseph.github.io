@@ -42,27 +42,27 @@
   background: #ff3a3a;
 }
 
-#block_0,
-#block_1,
-#block_2 {
+#tile_0,
+#tile_1,
+#tile_2 {
   border-top: none;
 }
 
-#block_0,
-#block_3,
-#block_6 {
+#tile_0,
+#tile_3,
+#tile_6 {
   border-left: none;
 }
 
-#block_6,
-#block_7,
-#block_8 {
+#tile_6,
+#tile_7,
+#tile_8 {
   border-bottom: none;
 }
 
-#block_2,
-#block_5,
-#block_8 {
+#tile_2,
+#tile_5,
+#tile_8 {
   border-right: none;
 }
 
