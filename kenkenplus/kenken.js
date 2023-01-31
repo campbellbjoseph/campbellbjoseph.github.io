@@ -227,10 +227,12 @@ function assign_operators(n, difficulty) {
 }
 //var out = assign_operators(6, 0);
 
+var queryString = location.search.substring(1).split("|");
+var n = parseInt(queryString[0]);
+var diff = parseInt(queryString[1]);
+
 var numSelected = null;
 var tileSelected = null;
-var n = 12;
-var diff = 0;
 var solution = null;
 
 window.onload = function() {
