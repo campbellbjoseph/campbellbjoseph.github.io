@@ -31,6 +31,21 @@ hr {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+
+.instruction {
+    width: 15px;
+    height: 15px;
+    margin-top: 5%;
+    margin-left: 5%;
+
+    font-size: 15px;
+    font-weight: bold;
+    justify-content: left;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 #digits {
@@ -80,3 +95,22 @@ hr {
     border-right: 2px solid black;
 }
 
+.thicc-top {
+    border-top: 4px solid black;
+}
+
+.thicc-bottom {
+    border-bottom: 4px solid black;
+}
+
+.thicc-left {
+    border-left: 4px solid black;
+}
+
+.thicc-right {
+    border-right: 4px solid black;
+}
+
+.wrong-tile {
+    background-color: rgb(158, 61, 61);
+}

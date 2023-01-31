@@ -150,7 +150,7 @@ function find_value(grid, operator, cells) {
         return big - small;
     }
 
-    else if (operator == "/") {
+    else if (operator == "÷") {
         c0 = cells[0];
         c1 = cells[1];
         v0 = grid[c0[0]][c0[1]];
@@ -173,6 +173,33 @@ function find_value(grid, operator, cells) {
     }
 }
 
+function is_top_left_cell(coord, cells) {
+    console.log(coord, cells);
+    
+    for (let i = 0; i < cells.length; i++) {
+        let cell = cells[i];
+        if (coord[0] > cell[0] || coord[1] > cell[1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function find_best_cell(cells) {
+    let best = cells[0];
+    for (let i = 0; i < cells.length; i++) {
+        let cell = cells[i];
+        if (best[0] > cell[0]) {
+            best = cell;
+        }
+        else if (best[0] == cell[0] && best[1] > cell[1]) {
+            best = cell;
+        }
+    }
+    console.log(cells, best);
+    return best;
+}
+
 function assign_operators(n, difficulty) {
     var out = create_puzzle(n, difficulty);
     var grid = out[0];
@@ -185,7 +212,7 @@ function assign_operators(n, difficulty) {
         let op = ["+", "x"];
         if (cells.length == 2) {
             op.push("-");
-            op.push("/");
+            op.push("÷");
         }
         let operation = op[Math.floor(Math.random() * op.length)];
         let val = find_value(grid, operation, cells);
@@ -196,55 +223,74 @@ function assign_operators(n, difficulty) {
         console.log
         cage_operators_values[id] = [operation, val];
     }
-    console.log(grid);
-    console.log(cage_grid);
-    console.log(cage_cells);
-    console.log(cage_operators_values);
     return [grid, cage_grid, cage_cells, cage_operators_values];
 }
 //var out = assign_operators(6, 0);
+
+var numSelected = null;
+var tileSelected = null;
+var n = 6;
+var diff = 0;
+var solution = null;
 
 window.onload = function() {
     setGame();
 }
 
 function setGame() {
-    var n = 6;
-    var diff = 0;
     var out = assign_operators(n, diff);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
     var cage_operators_values = out[3];
+    solution = grid;
 
     for (let i = 1; i <= n; i++) {
         //<div id="1" class="number">1</div>
         let number = document.createElement("div");
         number.id = i
         number.innerText = i;
-        //number.addEventListener("click", selectNumber);
+        number.addEventListener("click", selectNumber);
         number.classList.add("number");
         document.getElementById("digits").appendChild(number);
     }
     var tiles = []
     for (let id in cage_cells) {
         let cells = cage_cells[id];
-        console.log(id, cells);
         //console.log(cage_operators_values);
         let data = cage_operators_values[id];
         
         if (cells.length == 1) {
             let tile = document.createElement("div");
+            let inst = document.createElement("div");
+
             tile.id = cells[0][0].toString() + "-" + cells[0][1].toString();
+            inst.id = tile.id + ":" + data[1].toString() + data[0];
+            inst.innerText = data[1].toString();
+            inst.classList.add("instruction");
             tile.classList.add("thick-top");
             tile.classList.add("thick-bottom");
             tile.classList.add("thick-right");
             tile.classList.add("thick-left");
             tile.innerText = data[1];
             tile.classList.add("tile");
+            tile.append(inst);
+            if (cells[0][0] == 0) {
+                tile.classList.add("thicc-top");
+            }
+            if (cells[0][0] == n - 1) {
+                tile.classList.add("thicc-bottom");
+            }
+            if (cells[0][1] == 0) {
+                tile.classList.add("thicc-left");
+            }
+            if (cells[0][1] == n - 1) {
+                tile.classList.add("thicc-right");
+            }
             tiles.push(tile);
         }
         else {
+            let best = find_best_cell(cells);
             for (let i = 0; i < cells.length; i++) {
                 let tile = document.createElement("div");
                 tile.id = cells[i][0].toString() + "-" + cells[i][1].toString();
@@ -253,8 +299,6 @@ function setGame() {
                 for (let j = 0; j < cells.length; j++) {
                     if (i != j && are_adjacent(cells[i], cells[j])) {
                         let border = tangent_border(cells[i], cells[j]);
-                        thin.push(border);
-                        console.log(cells[i], cells[j], border);
                         thick.splice(thick.indexOf(border), 1);
                     }
                 }
@@ -270,20 +314,35 @@ function setGame() {
                 if (thick.indexOf("right") != -1) {
                     tile.classList.add("thick-right");
                 }
+                if (cells[i][0] == 0) {
+                    tile.classList.add("thicc-top");
+                }
+                if (cells[i][0] == n - 1) {
+                    tile.classList.add("thicc-bottom");
+                }
+                if (cells[i][1] == 0) {
+                    tile.classList.add("thicc-left");
+                }
+                if (cells[i][1] == n - 1) {
+                    tile.classList.add("thicc-right");
+                }
                 tile.classList.add("tile");
+                if (cells[i][0] == best[0] && cells[i][1] == best[1]) {
+                    let inst = document.createElement("div");
+                    inst.id = tile.id + ":" + data[1].toString() + data[0];
+                    inst.innerText = data[1].toString() + data[0];
+                    inst.classList.add("instruction");
+                    tile.append(inst);
+                }
+                tile.addEventListener("click", selectTile);
                 tiles.push(tile);
-                console.log(cells[i], thin);
             }
         }
     } 
-    console.log(tiles);
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             let this_id = r.toString() + "-" + c.toString();
             for (let i = 0; i < tiles.length; i++) {
-                if (r + c == 0) {
-                    console.log(tiles[i]);
-                }
                 if (tiles[i].id == this_id) {
                     document.getElementById("board").append(tiles[i]);
                     tiles.splice(i, 1);
@@ -292,4 +351,61 @@ function setGame() {
         }
     }
 
+}
+
+function selectNumber() {
+    if (numSelected == this) {
+        numSelected.classList.remove("number-selected");
+        numSelected = null;
+    }
+    else {
+        if (numSelected != null) {
+            numSelected.classList.remove("number-selected");
+        } 
+        numSelected = this;
+        numSelected.classList.add("number-selected");
+    }
+}
+
+function selectTile() {
+    if (numSelected) {
+        let coords = this.id.split("-"); //["0", "0"]
+        let r = parseInt(coords[0]);
+        let c = parseInt(coords[1]);
+        let error = false;
+        for (let i = 0; i < n; i++) {
+            if (i != r) {
+                let t = document.getElementById(i.toString() + "-" + c.toString());
+                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                    if (t.innerHTML[0] == numSelected.id) {
+                        error = true;
+                    }
+                }
+            }
+            if (i != c) {
+                let t = document.getElementById(r.toString() + "-" + i.toString());
+                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                    if (t.innerHTML[0] == numSelected.id) {
+                        error = true;
+                    }
+                }
+            }
+        }
+
+        if (this.innerHTML.length == 0 || this.innerHTML[0] == "<") {
+            this.innerHTML  = numSelected.id + this.innerHTML;
+        }
+        else if (this.innerHTML.length > 0 && this.innerHTML[0] != "<") {
+            this.innerHTML  = numSelected.id + this.innerHTML.slice(1);
+        }
+
+        if (error) {
+            this.classList.add("wrong-tile");
+        } 
+        else {
+            if (this.classList.contains("wrong-tile")) {
+                this.classList.remove("wrong-tile");
+            }
+        }
+    }
 }
