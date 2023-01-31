@@ -107,6 +107,29 @@ function create_puzzle(n, difficulty) {
 
 }
 
+function are_adjacent(c1, c2) {
+    let dx = Math.abs(c1[0] - c2[0]);
+    let dy = Math.abs(c1[1] - c2[1]);
+    return (dx + dy) < 2;
+}
+
+function tangent_border(c1, c2) {
+    let dx = c1[0] - c2[0];
+    let dy = c1[1] - c2[1];
+    if (dx == 1 && dy == 0) {
+        return "top";
+    }
+    else if (dx == -1 && dy == 0) {
+        return "bottom";
+    }
+    else if (dx == 0 && dy == 1) {
+        return "left";
+    }
+    else if (dx == 0 && dy == -1) {
+        return "right";
+    }
+}
+
 function find_value(grid, operator, cells) {
     if (operator == "+") {
         ans = 0;
@@ -115,8 +138,7 @@ function find_value(grid, operator, cells) {
             ans += grid[cell[0]][cell[1]];
         }
         return ans;
-    }
-        
+    } 
 
     else if (operator == "-") {
         let c0 = cells[0];
@@ -127,7 +149,6 @@ function find_value(grid, operator, cells) {
         let small = Math.min(v0, v1);
         return big - small;
     }
-        
 
     else if (operator == "/") {
         c0 = cells[0];
@@ -141,7 +162,6 @@ function find_value(grid, operator, cells) {
         }
         return big / small;
     }
-       
 
     else {
         ans = 1
@@ -182,4 +202,94 @@ function assign_operators(n, difficulty) {
     console.log(cage_operators_values);
     return [grid, cage_grid, cage_cells, cage_operators_values];
 }
-assign_operators(6, 0);
+//var out = assign_operators(6, 0);
+
+window.onload = function() {
+    setGame();
+}
+
+function setGame() {
+    var n = 6;
+    var diff = 0;
+    var out = assign_operators(n, diff);
+    var grid = out[0];
+    var cage_grid = out[1];
+    var cage_cells = out[2];
+    var cage_operators_values = out[3];
+
+    for (let i = 1; i <= n; i++) {
+        //<div id="1" class="number">1</div>
+        let number = document.createElement("div");
+        number.id = i
+        number.innerText = i;
+        //number.addEventListener("click", selectNumber);
+        number.classList.add("number");
+        document.getElementById("digits").appendChild(number);
+    }
+    var tiles = []
+    for (let id in cage_cells) {
+        let cells = cage_cells[id];
+        console.log(id, cells);
+        //console.log(cage_operators_values);
+        let data = cage_operators_values[id];
+        
+        if (cells.length == 1) {
+            let tile = document.createElement("div");
+            tile.id = cells[0][0].toString() + "-" + cells[0][1].toString();
+            tile.classList.add("thick-top");
+            tile.classList.add("thick-bottom");
+            tile.classList.add("thick-right");
+            tile.classList.add("thick-left");
+            tile.innerText = data[1];
+            tile.classList.add("tile");
+            tiles.push(tile);
+        }
+        else {
+            for (let i = 0; i < cells.length; i++) {
+                let tile = document.createElement("div");
+                tile.id = cells[i][0].toString() + "-" + cells[i][1].toString();
+                let thick = ["bottom", "top", "left", "right"];
+                let thin = [];
+                for (let j = 0; j < cells.length; j++) {
+                    if (i != j && are_adjacent(cells[i], cells[j])) {
+                        let border = tangent_border(cells[i], cells[j]);
+                        thin.push(border);
+                        console.log(cells[i], cells[j], border);
+                        thick.splice(thick.indexOf(border), 1);
+                    }
+                }
+                if (thick.indexOf("bottom") != -1) {
+                    tile.classList.add("thick-bottom");
+                }
+                if (thick.indexOf("top") != -1) {
+                    tile.classList.add("thick-top");
+                }
+                if (thick.indexOf("left") != -1) {
+                    tile.classList.add("thick-left");
+                }
+                if (thick.indexOf("right") != -1) {
+                    tile.classList.add("thick-right");
+                }
+                tile.classList.add("tile");
+                tiles.push(tile);
+                console.log(cells[i], thin);
+            }
+        }
+    } 
+    console.log(tiles);
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            let this_id = r.toString() + "-" + c.toString();
+            for (let i = 0; i < tiles.length; i++) {
+                if (r + c == 0) {
+                    console.log(tiles[i]);
+                }
+                if (tiles[i].id == this_id) {
+                    document.getElementById("board").append(tiles[i]);
+                    tiles.splice(i, 1);
+                }
+            }
+        }
+    }
+
+}
