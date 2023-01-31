@@ -71,8 +71,36 @@ hr {
     align-items: center;
 }
 
+#buttons {
+    width: 450px;
+    height: 50px;
+
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.submit {
+    width: 89px;
+    height: 44px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: rgb(30, 227, 30);
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .number-selected {
     background-color: gray;
+}
+
+.tile-hovered {
+    background-color: rgb(220, 246, 255);
 }
 
 .tile-start {
@@ -113,4 +141,12 @@ hr {
 
 .wrong-tile {
     background-color: rgb(158, 61, 61);
+}
+
+.submit-hovered {
+    background-color: rgb(85, 242, 85);
+}
+
+.number-hovered {
+    background-color: rgb(255, 249, 185);
 }

@@ -43,7 +43,7 @@ function valid(coord, n) {
 }
 
 function create_puzzle(n, difficulty) {
-    var difficult = [[1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4],
+    var difficult = [[1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4,5],
               [1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4],
               [1,2,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,5,5]]
     var grid = generate_grid(n)
@@ -196,7 +196,7 @@ function find_best_cell(cells) {
             best = cell;
         }
     }
-    console.log(cells, best);
+    //console.log(cells, best);
     return best;
 }
 
@@ -251,6 +251,8 @@ function setGame() {
         number.id = i
         number.innerText = i;
         number.addEventListener("click", selectNumber);
+        number.addEventListener("mouseenter", hoverNumber);
+        number.addEventListener("mouseleave", exitNumber);
         number.classList.add("number");
         document.getElementById("digits").appendChild(number);
     }
@@ -335,6 +337,8 @@ function setGame() {
                     tile.append(inst);
                 }
                 tile.addEventListener("click", selectTile);
+                tile.addEventListener("mouseenter", hoverTile);
+                tile.addEventListener("mouseleave", exitTile);
                 tiles.push(tile);
             }
         }
@@ -350,6 +354,15 @@ function setGame() {
             }
         }
     }
+
+    let submit = document.createElement("div");
+    submit.id = "submit";
+    submit.innerText = "Submit";
+    submit.classList.add("submit");
+    submit.addEventListener("click", checkPuzzle);
+    submit.addEventListener("mouseenter", hoverSubmit);
+    submit.addEventListener("mouseleave", exitSubmit);
+    document.getElementById("buttons").append(submit);
 
 }
 
@@ -407,5 +420,79 @@ function selectTile() {
                 this.classList.remove("wrong-tile");
             }
         }
+    } 
+}
+
+function hoverTile() {
+    this.classList.add("tile-hovered");
+}
+
+function exitTile() {
+    this.classList.remove("tile-hovered");
+}
+
+function hoverSubmit() {
+    this.classList.add("submit-hovered");
+}
+
+function exitSubmit() {
+    this.classList.remove("submit-hovered");
+}
+
+function hoverNumber() {
+    if (numSelected != this) {
+        this.classList.add("number-hovered");
     }
+}
+
+function exitNumber() {
+    this.classList.remove("number-hovered");
+}
+
+function findErrors() {
+    errorList = [];
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            let this_id = r.toString() + "-" + c.toString();
+            let tile = document.getElementById(this_id);
+            if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
+                if (parseInt(tile.innerHTML.split("<")[0]) != solution[r][c]) {
+                    errorList.push(tile);
+                }
+            } else {
+                errorList.push(tile);
+            }
+        }
+    }
+    return errorList;
+}
+
+function checkPuzzle() {
+    let errorList = findErrors();
+    let errors = errorList.length;
+    
+    for (let i = 0; i < errors; i++) {
+        errorList[i].classList.add("wrong-tile");
+    }
+    if (errors == 0) {
+        console.log("Success!");
+    } else {
+        console.log(errors);
+        let submit = document.getElementById("submit");
+        submit.innerText = "Clear";
+        submit.removeEventListener("click", checkPuzzle);
+        submit.addEventListener("click", clearErrors);
+    }
+}
+
+function clearErrors() {
+    let errorList = findErrors();
+    let errors = errorList.length;
+    for (let i = 0; i < errors; i++) {
+        errorList[i].classList.remove("wrong-tile");
+    }
+
+    this.removeEventListener("click", clearErrors);
+    this.innerText = "Submit";
+    this.addEventListener("click", checkPuzzle);
 }
