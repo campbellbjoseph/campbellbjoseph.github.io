@@ -229,7 +229,7 @@ function assign_operators(n, difficulty) {
 
 var numSelected = null;
 var tileSelected = null;
-var n = 6;
+var n = 12;
 var diff = 0;
 var solution = null;
 
@@ -373,6 +373,32 @@ function setGame() {
     check.addEventListener("mouseleave", exitCheck);
     document.getElementById("buttons").append(check);
 
+    if (n <= 10) {
+        document.getElementById("board").style.width = 75*n;
+        document.getElementById("board").style.height = 75*n;
+        document.getElementById("digits").style.width = 75*n;
+        document.getElementById("buttons").style.width = 75*n;
+    } else {
+        if (n > 12) {
+            n = 12;
+        }
+        document.getElementById("board").style.width = 60*n;
+        document.getElementById("board").style.height = 60*n;
+        document.getElementById("digits").style.width = 60*n;
+        document.getElementById("buttons").style.width = 60*n;
+
+        tiles = document.querySelectorAll(".tile");
+        tiles.forEach(tile => {
+            tile.style.width = 60;
+            tile.style.height = 60;
+            tile.style.fontSize = 25;
+        });
+
+        insts = document.querySelectorAll(".instruction");
+        insts.forEach(inst => {
+            inst.style.fontSize = 12;
+        })
+    }
 }
 
 function selectNumber() {
