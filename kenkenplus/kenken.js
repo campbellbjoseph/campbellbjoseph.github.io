@@ -364,6 +364,15 @@ function setGame() {
     submit.addEventListener("mouseleave", exitSubmit);
     document.getElementById("buttons").append(submit);
 
+    let check = document.createElement("div");
+    check.id = "check";
+    check.innerText = "Check";
+    check.classList.add("check");
+    check.addEventListener("click", checkMistakes);
+    check.addEventListener("mouseenter", hoverCheck);
+    check.addEventListener("mouseleave", exitCheck);
+    document.getElementById("buttons").append(check);
+
 }
 
 function selectNumber() {
@@ -382,6 +391,7 @@ function selectNumber() {
 
 function selectTile() {
     if (numSelected) {
+        resetButtons();
         let coords = this.id.split("-"); //["0", "0"]
         let r = parseInt(coords[0]);
         let c = parseInt(coords[1]);
@@ -439,6 +449,14 @@ function exitSubmit() {
     this.classList.remove("submit-hovered");
 }
 
+function hoverCheck() {
+    this.classList.add("check-hovered");
+}
+
+function exitCheck() {
+    this.classList.remove("check-hovered");
+}
+
 function hoverNumber() {
     if (numSelected != this) {
         this.classList.add("number-hovered");
@@ -450,7 +468,7 @@ function exitNumber() {
 }
 
 function findErrors() {
-    errorList = [];
+    let errorList = [];
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             let this_id = r.toString() + "-" + c.toString();
@@ -465,6 +483,22 @@ function findErrors() {
         }
     }
     return errorList;
+}
+
+function findMistakes() {
+    let mistakeList = [];
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            let this_id = r.toString() + "-" + c.toString();
+            let tile = document.getElementById(this_id);
+            if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
+                if (parseInt(tile.innerHTML.split("<")[0]) != solution[r][c]) {
+                    mistakeList.push(tile);
+                }
+            }
+        }
+    }
+    return mistakeList;
 }
 
 function checkPuzzle() {
@@ -495,4 +529,51 @@ function clearErrors() {
     this.removeEventListener("click", clearErrors);
     this.innerText = "Submit";
     this.addEventListener("click", checkPuzzle);
+}
+
+function checkMistakes() {
+    let mistakeList = findMistakes();
+    let mistakes = mistakeList.length;
+    
+    for (let i = 0; i < mistakes; i++) {
+        mistakeList[i].classList.add("wrong-tile");
+    }
+
+    if (mistakes == 0) {
+        console.log("Success!");
+    } else {
+        console.log(mistakes);
+        let check = document.getElementById("check");
+        check.innerText = "Clear";
+        check.removeEventListener("click", checkMistakes);
+        check.addEventListener("click", clearMistakes);
+    }
+}
+
+function clearMistakes() {
+    let mistakeList = findMistakes();
+    let mistakes = mistakeList.length;
+    for (let i = 0; i < mistakes; i++) {
+        mistakeList[i].classList.remove("wrong-tile");
+    }
+
+    this.removeEventListener("click", clearMistakes);
+    this.innerText = "Check";
+    this.addEventListener("click", checkMistakes);
+}
+
+function resetButtons() {
+    let submit = document.getElementById("submit");
+    if (submit.innerText == "Clear") {
+        submit.removeEventListener("click", clearErrors);
+        submit.innerText = "Submit";
+        submit.addEventListener("click", checkPuzzle);
+    }
+
+    let check = document.getElementById("check");
+    if (check.innerText == "Clear") {
+        check.removeEventListener("click", clearMistakes);
+        check.innerText = "Check";
+        check.addEventListener("click", checkMistakes);
+    }
 }

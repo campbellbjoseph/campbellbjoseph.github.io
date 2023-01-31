@@ -95,6 +95,21 @@ hr {
     align-items: center;
 }
 
+.check {
+    width: 89px;
+    height: 44px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: rgb(117, 217, 251);
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .number-selected {
     background-color: gray;
 }
@@ -145,6 +160,10 @@ hr {
 
 .submit-hovered {
     background-color: rgb(85, 242, 85);
+}
+
+.check-hovered {
+    background-color: rgb(155, 230, 255);
 }
 
 .number-hovered {
