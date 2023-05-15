@@ -384,21 +384,21 @@ function setGame() {
         if (n > 12) {
             n = 12;
         }
-        document.getElementById("board").style.width = 60*n;
-        document.getElementById("board").style.height = 60*n;
-        document.getElementById("digits").style.width = 60*n;
-        document.getElementById("buttons").style.width = 60*n;
+        document.getElementById("board").style.width = 65*n;
+        document.getElementById("board").style.height = 65*n;
+        document.getElementById("digits").style.width = 65*n;
+        document.getElementById("buttons").style.width = 65*n;
 
         tiles = document.querySelectorAll(".tile");
         tiles.forEach(tile => {
-            tile.style.width = 60;
-            tile.style.height = 60;
-            tile.style.fontSize = 25;
+            tile.style.width = 65;
+            tile.style.height = 65;
+            tile.style.fontSize = 28;
         });
 
         insts = document.querySelectorAll(".instruction");
         insts.forEach(inst => {
-            inst.style.fontSize = 12;
+            inst.style.fontSize = 13;
         })
     }
 }
@@ -537,7 +537,7 @@ function checkPuzzle() {
         errorList[i].classList.add("wrong-tile");
     }
     if (errors == 0) {
-        console.log("Success!");
+        document.getElementById("title").innerText = "You win!";
     } else {
         console.log(errors);
         let submit = document.getElementById("submit");
