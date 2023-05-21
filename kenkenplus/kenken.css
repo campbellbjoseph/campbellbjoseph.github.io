@@ -109,6 +109,21 @@ hr {
     align-items: center;
 }
 
+.del {
+    width: 89px;
+    height: 44px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: rgb(235, 38, 38);
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .number-selected {
     background-color: gray;
 }
@@ -167,4 +182,8 @@ hr {
 
 .number-hovered {
     background-color: rgb(255, 249, 185);
+}
+
+.del-hovered {
+    background-color: rgb(232, 107, 107);
 }
