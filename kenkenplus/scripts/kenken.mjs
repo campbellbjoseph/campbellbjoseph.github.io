@@ -186,48 +186,51 @@ function setGame() {
     }
 }
 
+function updateTile(tile, number) {
+    resetButtons();
+    let coords = tile.id.split("-"); //["0", "0"]
+    let r = parseInt(coords[0]);
+    let c = parseInt(coords[1]);
+    let error = false;
+    for (let i = 0; i < n; i++) {
+        if (i != r) {
+            let t = document.getElementById(i.toString() + "-" + c.toString());
+            if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                if (t.innerHTML[0] == number.id) {
+                    error = true;
+                }
+            }
+        }
+        if (i != c) {
+            let t = document.getElementById(r.toString() + "-" + i.toString());
+            if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                if (t.innerHTML[0] == number.id) {
+                    error = true;
+                }
+            }
+        }
+    }
+
+    if (tile.innerHTML.length == 0 || tile.innerHTML[0] == "<") {
+        tile.innerHTML  = number.id + tile.innerHTML;
+    }
+    else if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
+        tile.innerHTML  = number.id + tile.innerHTML.slice(1);
+    }
+
+    if (error) {
+        tile.classList.add("wrong-tile");
+    } 
+    else {
+        if (tile.classList.contains("wrong-tile")) {
+            tile.classList.remove("wrong-tile");
+        }
+    }
+}
+
 function selectNumber() {
     if (tileSelected) {
-        resetButtons();
-        let coords = tileSelected.id.split("-"); //["0", "0"]
-        let r = parseInt(coords[0]);
-        let c = parseInt(coords[1]);
-        let error = false;
-        for (let i = 0; i < n; i++) {
-            if (i != r) {
-                let t = document.getElementById(i.toString() + "-" + c.toString());
-                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                    if (t.innerHTML[0] == this.id) {
-                        error = true;
-                    }
-                }
-            }
-            if (i != c) {
-                let t = document.getElementById(r.toString() + "-" + i.toString());
-                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                    if (t.innerHTML[0] == this.id) {
-                        error = true;
-                    }
-                }
-            }
-        }
-
-        if (tileSelected.innerHTML.length == 0 || tileSelected.innerHTML[0] == "<") {
-            tileSelected.innerHTML  = this.id + tileSelected.innerHTML;
-        }
-        else if (tileSelected.innerHTML.length > 0 && tileSelected.innerHTML[0] != "<") {
-            tileSelected.innerHTML  = this.id + tileSelected.innerHTML.slice(1);
-        }
-
-        if (error) {
-            tileSelected.classList.add("wrong-tile");
-        } 
-        else {
-            if (tileSelected.classList.contains("wrong-tile")) {
-                tileSelected.classList.remove("wrong-tile");
-            }
-        }
-
+        updateTile(tileSelected, this);
     }
     else {
         if (numSelected == this) {
@@ -246,45 +249,7 @@ function selectNumber() {
 
 function selectTile() {
     if (numSelected) {
-        resetButtons();
-        let coords = this.id.split("-"); //["0", "0"]
-        let r = parseInt(coords[0]);
-        let c = parseInt(coords[1]);
-        let error = false;
-        for (let i = 0; i < n; i++) {
-            if (i != r) {
-                let t = document.getElementById(i.toString() + "-" + c.toString());
-                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                    if (t.innerHTML[0] == numSelected.id) {
-                        error = true;
-                    }
-                }
-            }
-            if (i != c) {
-                let t = document.getElementById(r.toString() + "-" + i.toString());
-                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                    if (t.innerHTML[0] == numSelected.id) {
-                        error = true;
-                    }
-                }
-            }
-        }
-
-        if (this.innerHTML.length == 0 || this.innerHTML[0] == "<") {
-            this.innerHTML  = numSelected.id + this.innerHTML;
-        }
-        else if (this.innerHTML.length > 0 && this.innerHTML[0] != "<") {
-            this.innerHTML  = numSelected.id + this.innerHTML.slice(1);
-        }
-
-        if (error) {
-            this.classList.add("wrong-tile");
-        } 
-        else {
-            if (this.classList.contains("wrong-tile")) {
-                this.classList.remove("wrong-tile");
-            }
-        }
+        updateTile(this, numSelected);
     } 
     else {
         if (tileSelected == this) {
