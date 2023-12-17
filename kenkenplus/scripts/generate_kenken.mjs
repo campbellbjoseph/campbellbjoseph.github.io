@@ -212,7 +212,7 @@ export function assign_operators(n, difficulty) {
         let op = ["+", "x"];
         if (cells.length == 2) {
             op.push("-");
-            op.push("÷");
+            op.push("/");
         }
         let operation = op[Math.floor(Math.random() * op.length)];
         let val = find_value(grid, operation, cells);
