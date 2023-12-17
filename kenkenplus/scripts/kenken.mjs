@@ -187,16 +187,60 @@ function setGame() {
 }
 
 function selectNumber() {
-    if (numSelected == this) {
-        numSelected.classList.remove("number-selected");
-        numSelected = null;
+    if (tileSelected) {
+        resetButtons();
+        let coords = tileSelected.id.split("-"); //["0", "0"]
+        let r = parseInt(coords[0]);
+        let c = parseInt(coords[1]);
+        let error = false;
+        for (let i = 0; i < n; i++) {
+            if (i != r) {
+                let t = document.getElementById(i.toString() + "-" + c.toString());
+                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                    if (t.innerHTML[0] == this.id) {
+                        error = true;
+                    }
+                }
+            }
+            if (i != c) {
+                let t = document.getElementById(r.toString() + "-" + i.toString());
+                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                    if (t.innerHTML[0] == this.id) {
+                        error = true;
+                    }
+                }
+            }
+        }
+
+        if (tileSelected.innerHTML.length == 0 || tileSelected.innerHTML[0] == "<") {
+            tileSelected.innerHTML  = this.id + tileSelected.innerHTML;
+        }
+        else if (tileSelected.innerHTML.length > 0 && tileSelected.innerHTML[0] != "<") {
+            tileSelected.innerHTML  = this.id + tileSelected.innerHTML.slice(1);
+        }
+
+        if (error) {
+            tileSelected.classList.add("wrong-tile");
+        } 
+        else {
+            if (tileSelected.classList.contains("wrong-tile")) {
+                tileSelected.classList.remove("wrong-tile");
+            }
+        }
+
     }
     else {
-        if (numSelected != null) {
+        if (numSelected == this) {
             numSelected.classList.remove("number-selected");
-        } 
-        numSelected = this;
-        numSelected.classList.add("number-selected");
+            numSelected = null;
+        }
+        else {
+            if (numSelected != null) {
+                numSelected.classList.remove("number-selected");
+            } 
+            numSelected = this;
+            numSelected.classList.add("number-selected");
+        }
     }
 }
 
@@ -242,6 +286,19 @@ function selectTile() {
             }
         }
     } 
+    else {
+        if (tileSelected == this) {
+            tileSelected.classList.remove("tile-selected");
+            tileSelected = null;
+        }
+        else {
+            if (tileSelected != null) {
+                tileSelected.classList.remove("tile-selected");
+            } 
+            tileSelected = this;
+            tileSelected.classList.add("tile-selected");
+        }
+    }
 }
 
 function hoverTile() {

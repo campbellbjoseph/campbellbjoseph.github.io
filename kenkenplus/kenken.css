@@ -132,6 +132,10 @@ hr {
     background-color: rgb(220, 246, 255);
 }
 
+.tile-selected {
+    background-color: rgb(96, 213, 252);
+}
+
 .tile-start {
     background-color: whitesmoke;
 }
