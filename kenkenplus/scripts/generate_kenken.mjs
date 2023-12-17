@@ -107,13 +107,13 @@ function create_puzzle(n, difficulty) {
 
 }
 
-function are_adjacent(c1, c2) {
+export function are_adjacent(c1, c2) {
     let dx = Math.abs(c1[0] - c2[0]);
     let dy = Math.abs(c1[1] - c2[1]);
     return (dx + dy) < 2;
 }
 
-function tangent_border(c1, c2) {
+export function tangent_border(c1, c2) {
     let dx = c1[0] - c2[0];
     let dy = c1[1] - c2[1];
     if (dx == 1 && dy == 0) {
@@ -132,7 +132,7 @@ function tangent_border(c1, c2) {
 
 function find_value(grid, operator, cells) {
     if (operator == "+") {
-        ans = 0;
+        let ans = 0;
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
             ans += grid[cell[0]][cell[1]];
@@ -151,10 +151,10 @@ function find_value(grid, operator, cells) {
     }
 
     else if (operator == "÷") {
-        c0 = cells[0];
-        c1 = cells[1];
-        v0 = grid[c0[0]][c0[1]];
-        v1 = grid[c1[0]][c1[1]];
+        let c0 = cells[0];
+        let c1 = cells[1];
+        let v0 = grid[c0[0]][c0[1]];
+        let v1 = grid[c1[0]][c1[1]];
         let big = Math.max(v0, v1);
         let small = Math.min(v0, v1);
         if (big % small != 0) {
@@ -164,7 +164,7 @@ function find_value(grid, operator, cells) {
     }
 
     else {
-        ans = 1
+        let ans = 1
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
             ans *= grid[cell[0]][cell[1]];
@@ -185,7 +185,7 @@ function is_top_left_cell(coord, cells) {
     return true;
 }
 
-function find_best_cell(cells) {
+export function find_best_cell(cells) {
     let best = cells[0];
     for (let i = 0; i < cells.length; i++) {
         let cell = cells[i];
@@ -200,7 +200,7 @@ function find_best_cell(cells) {
     return best;
 }
 
-function assign_operators(n, difficulty) {
+export function assign_operators(n, difficulty) {
     var out = create_puzzle(n, difficulty);
     var grid = out[0];
     var cage_grid = out[1];
