@@ -229,6 +229,7 @@ function updateTile(tile, number) {
 }
 
 function selectNumber() {
+    stopDeleting()
     if (tileSelected) {
         updateTile(tileSelected, this);
     }
@@ -248,20 +249,30 @@ function selectNumber() {
 }
 
 function selectTile() {
-    if (numSelected) {
-        updateTile(this, numSelected);
-    } 
-    else {
-        if (tileSelected == this) {
-            tileSelected.classList.remove("tile-selected");
-            tileSelected = null;
+    if (deleting) {
+        if (this.innerHTML.length > 0 && this.innerHTML[0] != "<") {
+            this.innerHTML  = this.innerHTML.slice(1);
+            console.log(this.classList)
+            if (this.classList.contains("wrong-tile")){
+                this.classList.remove("wrong-tile");
+            }
         }
+    } else {
+        if (numSelected) {
+            updateTile(this, numSelected);
+        } 
         else {
-            if (tileSelected != null) {
+            if (tileSelected == this) {
                 tileSelected.classList.remove("tile-selected");
-            } 
-            tileSelected = this;
-            tileSelected.classList.add("tile-selected");
+                tileSelected = null;
+            }
+            else {
+                if (tileSelected != null) {
+                    tileSelected.classList.remove("tile-selected");
+                } 
+                tileSelected = this;
+                tileSelected.classList.add("tile-selected");
+            }
         }
     }
 }
@@ -344,6 +355,7 @@ function findMistakes() {
 }
 
 function checkPuzzle() {
+    stopDeleting()
     let errorList = findErrors();
     let errors = errorList.length;
     
@@ -374,6 +386,7 @@ function clearErrors() {
 }
 
 function checkMistakes() {
+    stopDeleting();
     let mistakeList = findMistakes();
     let mistakes = mistakeList.length;
     
@@ -418,10 +431,22 @@ function resetButtons() {
         check.innerText = "Check";
         check.addEventListener("click", checkMistakes);
     }
+
+    stopDeleting();
 }
 
 function startDeleting() {
-    if (!deleting) {
-        deleting = true;
-    }
+    deleting = true;
+    let d = document.getElementById("del");
+    d.innerText = "Stop"
+    d.removeEventListener("click", startDeleting);
+    d.addEventListener("click", stopDeleting);
+}
+
+function stopDeleting() {
+    deleting = false;
+    let d = document.getElementById("del");
+    d.innerText = "Delete"
+    d.removeEventListener("click", stopDeleting);
+    d.addEventListener("click", startDeleting);
 }
