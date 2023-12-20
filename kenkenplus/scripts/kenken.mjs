@@ -1,4 +1,4 @@
-import { assign_operators, find_best_cell, are_adjacent, tangent_border } from "./generate_kenken.mjs";
+import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions } from "./generate_kenken.mjs";
 
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
@@ -13,14 +13,67 @@ window.onload = function() {
     setGame();
 }
 
+function zero2D(k) {
+    let arr = Array(k);
+    for (let i = 0; i < k; i++) {
+        arr[i] = Array(k);
+    }
+    for (let i = 0; i < k; i++) {
+        for (let j = 0; j < k; j++) {
+            arr[i][j] = -1;
+        }
+    }
+    return arr;
+  }
+
+function do_outputs(m, cc, cov) {
+    //console.log("--------------------------");
+    let initial_array = zero2D(m);
+    //console.log(initial_array);
+    for (let id in cc) {
+        if (cc[id].length == 1) {
+            initial_array[cc[id][0][0]][cc[id][0][1]] = cov[id][1];
+        }
+    }
+    //console.log(initial_array);
+    //console.log("Starting: ");
+    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov);
+}
+
+function simulate(n, iter) {
+    let arr = [0,0,0,0,0,0,0,0,0,0,0]
+    for (let i = 0; i < iter; i++) {
+        var out = assign_operators(n, diff);
+        var grid = out[0];
+        var cage_grid = out[1];
+        var cage_cells = out[2];
+        var cage_operators_values = out[3];
+        arr[do_outputs(n, cage_cells, cage_operators_values)] += 1;
+    }
+    console.log(arr);
+}
+
 function setGame() {
     var out = assign_operators(n, diff);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
     var cage_operators_values = out[3];
+    let s = do_outputs(n, cage_cells, cage_operators_values);
+    while (s != 1) {
+        out = assign_operators(n, diff);
+        grid = out[0];
+        cage_grid = out[1];
+        cage_cells = out[2];
+        cage_operators_values = out[3];
+        s = do_outputs(n, cage_cells, cage_operators_values);
+    }
     solution = grid;
-
+    console.log(grid);
+    //console.log(cage_grid);
+    //console.log(cage_cells);
+    //console.log(cage_operators_values);
+    //console.log(simulate(n, 100))
     for (let i = 1; i <= n; i++) {
         //<div id="1" class="number">1</div>
         let number = document.createElement("div");
@@ -130,7 +183,6 @@ function setGame() {
             }
         }
     }
-
     let submit = document.createElement("div");
     submit.id = "submit";
     submit.innerText = "Submit";
@@ -363,7 +415,9 @@ function checkPuzzle() {
         errorList[i].classList.add("wrong-tile");
     }
     if (errors == 0) {
-        document.getElementById("title").innerText = "You win!";
+        let messages = ["You win!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
+
+        document.getElementById("title").innerHTML = "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
           
     } else {
         console.log(errors);

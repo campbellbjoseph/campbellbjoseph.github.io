@@ -150,7 +150,7 @@ function find_value(grid, operator, cells) {
         return big - small;
     }
 
-    else if (operator == "÷") {
+    else if (operator == "/") {
         let c0 = cells[0];
         let c1 = cells[1];
         let v0 = grid[c0[0]][c0[1]];
@@ -220,8 +220,147 @@ export function assign_operators(n, difficulty) {
             operation = op[Math.floor(Math.random() * 3)];
             val = find_value(grid, operation, cells);
         }
-        console.log
         cage_operators_values[id] = [operation, val];
     }
     return [grid, cage_grid, cage_cells, cage_operators_values];
+}
+
+function safe_row_col(n, cur_grid, coord, val) {
+    for (let i = 0; i < n; i++) { 
+        if (i != coord[1] && val == cur_grid[coord[0]][i]) {
+            return false;
+        }
+        if (i != coord[0] && val == cur_grid[i][coord[1]]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function coord_equal(c1, c2) {
+    return (c1[0] == c2[0] && c1[1] == c2[1])
+}
+
+function twoD_contains(twoD, oneD) {
+    for (let i = 0; i < twoD.length; i++) {
+        if (coord_equal(twoD[i], oneD)) {
+            //console.log(twoD[i].toString() + " == " + oneD.toString())
+            return true;
+        }
+    }
+    return false;
+}
+
+function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
+    let cur_cage = 0;
+    for (let i = 0; i < Object.keys(cage_cells).length; i++) {
+        if (twoD_contains(cage_cells[i], coord)) {
+            cur_cage = i;
+            break;
+        }
+    }
+
+    let op = cage_operators_values[cur_cage];
+    let vals = [val];
+    let current_cell = cage_cells[cur_cage];
+    for (let i = 0; i < current_cell.length; i++) {
+        let c = current_cell[i];
+        if (cur_grid[c[0]][c[1]] != -1) {
+            vals.push(cur_grid[c[0]][c[1]]);
+        }
+    }
+    //console.log("----")
+    //console.log(cur_grid)
+    //console.log(coord, val)
+    //console.log(vals)
+    if (op[0] == "+") {
+        let ans = vals.reduce((a,b) => a + b, 0);
+        if (ans > op[1]) {
+            //console.log("FAILED")
+            //console.log(op)
+            return false;
+        }
+        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+            //console.log("FAILED")
+            //console.log(op)
+            return false;
+        }
+    }
+    else if (op[0] == "x") {
+        let ans = vals.reduce((a,b) => a*b, 1);
+        if (ans > op[1]) {
+            //console.log("FAILED")
+            //console.log(op)
+            return false;
+        }
+        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+            //console.log("FAILED")
+            //console.log(op)
+            return false;
+        }
+    } 
+    else if (op[0] == "-") {
+        if (vals.length == 2) {
+            let big = Math.max(vals[0], vals[1]);
+            let small = Math.min(vals[0], vals[1]);
+            //console.log("SUB");
+            //console.log([big, small]);
+            if (big - small != op[1]) {
+                //console.log("FAILED")
+                //console.log(op)
+                return false;
+            }
+        }
+    }
+    else {
+        if (vals.length == 2) {
+            let big = Math.max(vals[0], vals[1]);
+            let small = Math.min(vals[0], vals[1]);
+            //console.log("DIV");
+            //console.log([big, small]);
+            if (big % small != 0 || big / small != op[1]) {
+                //console.log("FAILED")
+                //console.log(op)
+                return false;
+            }
+        }
+    }
+    //console.log("proceeding...")
+    return true;
+}
+
+export function solutions(n, cur_grid, cage_cells, cage_operators_values) {
+    let r = 0;
+    let c = 0;
+    let incomplete = false;
+    for (r = 0; r < n; r++) {
+        for (c = 0; c < n; c++) {
+            if (cur_grid[r][c] == -1) {
+                incomplete = true;
+                break;
+            }
+        }
+        if (incomplete) {
+            break;
+        }
+    }
+
+    if (incomplete == false) {
+        //console.log("--------------------");
+        //console.log("Solution Found!");
+        //console.log(cur_grid);
+        //console.log("--------------------");
+        return 1;
+    }
+
+    let ans = 0;
+    for (let i = 1; i <= n; i++) {
+        if (safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i) && safe_row_col(n, cur_grid, [r,c], i)) {
+            let next_grid = JSON.parse(JSON.stringify(cur_grid));
+            next_grid[r][c] = i;
+            //console.log(next_grid);
+            ans += solutions(n, next_grid, cage_cells, cage_operators_values);
+        }
+    }
+    return ans;
 }
