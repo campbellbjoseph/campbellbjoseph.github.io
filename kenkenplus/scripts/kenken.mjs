@@ -3,6 +3,7 @@ import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutio
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
 var diff = parseInt(queryString[1]);
+var zero_allowed = false;
 
 var numSelected = null;
 var tileSelected = null;
@@ -12,10 +13,13 @@ var won = false;
 var count = 0;
 var sec = 0;
 var min = 0;
+var tileHovered = null;
+
 
 window.onload = function() {
-    stopwatch();
     setGame();
+    stopwatch();
+    
 }
 
 function stopwatch() {
@@ -91,7 +95,9 @@ function setGame() {
     var cage_cells = out[2];
     var cage_operators_values = out[3];
     let s = do_outputs(n, cage_cells, cage_operators_values);
+    let att = 1;
     while (s != 1) {
+        att++;
         out = assign_operators(n, diff);
         grid = out[0];
         cage_grid = out[1];
@@ -100,7 +106,8 @@ function setGame() {
         s = do_outputs(n, cage_cells, cage_operators_values);
     }
     solution = grid;
-    console.log(grid);
+    console.log(att);
+    //console.log(grid);
     //console.log(cage_grid);
     //console.log(cage_cells);
     //console.log(cage_operators_values);
@@ -241,6 +248,16 @@ function setGame() {
     del.addEventListener("click", startDeleting);
     document.getElementById("buttons").append(del);
 
+    window.addEventListener("keydown", function(event) {
+        if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
+            if ((zero_allowed == false && event.code != "Digit0") || zero_allowed) {
+                if (parseInt(event.code[5]) <= n) {
+                    updateTile(tileHovered, parseInt(event.code[5]));
+                }
+            }
+        }
+    });
+
     if (n <= 10) {
         document.getElementById("board").style.width = 75*n;
         document.getElementById("board").style.height = 75*n;
@@ -269,6 +286,7 @@ function setGame() {
     }
 }
 
+
 function updateTile(tile, number) {
     resetButtons();
     let coords = tile.id.split("-"); //["0", "0"]
@@ -279,7 +297,7 @@ function updateTile(tile, number) {
         if (i != r) {
             let t = document.getElementById(i.toString() + "-" + c.toString());
             if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                if (t.innerHTML[0] == number.id) {
+                if (t.innerHTML[0] == number) {
                     error = true;
                 }
             }
@@ -287,7 +305,7 @@ function updateTile(tile, number) {
         if (i != c) {
             let t = document.getElementById(r.toString() + "-" + i.toString());
             if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
-                if (t.innerHTML[0] == number.id) {
+                if (t.innerHTML[0] == number) {
                     error = true;
                 }
             }
@@ -295,10 +313,10 @@ function updateTile(tile, number) {
     }
 
     if (tile.innerHTML.length == 0 || tile.innerHTML[0] == "<") {
-        tile.innerHTML  = number.id + tile.innerHTML;
+        tile.innerHTML  = number + tile.innerHTML;
     }
     else if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
-        tile.innerHTML  = number.id + tile.innerHTML.slice(1);
+        tile.innerHTML  = number + tile.innerHTML.slice(1);
     }
 
     if (error) {
@@ -314,7 +332,7 @@ function updateTile(tile, number) {
 function selectNumber() {
     stopDeleting()
     if (tileSelected) {
-        updateTile(tileSelected, this);
+        updateTile(tileSelected, this.id);
     }
     else {
         if (numSelected == this) {
@@ -335,14 +353,14 @@ function selectTile() {
     if (deleting) {
         if (this.innerHTML.length > 0 && this.innerHTML[0] != "<") {
             this.innerHTML  = this.innerHTML.slice(1);
-            console.log(this.classList)
+            //console.log(this.classList)
             if (this.classList.contains("wrong-tile")){
                 this.classList.remove("wrong-tile");
             }
         }
     } else {
         if (numSelected) {
-            updateTile(this, numSelected);
+            updateTile(this, numSelected.id);
         } 
         else {
             if (tileSelected == this) {
@@ -362,10 +380,12 @@ function selectTile() {
 
 function hoverTile() {
     this.classList.add("tile-hovered");
+    tileHovered = this;
 }
 
 function exitTile() {
     this.classList.remove("tile-hovered");
+    tileHovered = null;
 }
 
 function hoverSubmit() {

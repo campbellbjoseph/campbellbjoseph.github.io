@@ -293,6 +293,9 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
             //console.log(op)
             return false;
         }
+        if (op[1] % ans != 0) {
+            return false;
+        }
         if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
             //console.log("FAILED")
             //console.log(op)
@@ -311,6 +314,13 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
                 return false;
             }
         }
+        else if (vals.length == 1) {
+            let a = vals[0] + op[1];
+            let b = vals[0] - op[1];
+            if (a > n && b < 1) {
+                return false;
+            }
+        }
     }
     else {
         if (vals.length == 2) {
@@ -321,6 +331,11 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
             if (big % small != 0 || big / small != op[1]) {
                 //console.log("FAILED")
                 //console.log(op)
+                return false;
+            }
+        } 
+        else if (vals.length == 1) {
+            if (val % op[1] != 0 && val * op[1] > n) {
                 return false;
             }
         }
