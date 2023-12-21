@@ -4,27 +4,11 @@
         <meta name="viewport" content="width=device-width initial-scale=1.0 user-scalable=no">
         <title>BrainTeaser</title>
         <link rel="stylesheet" href="index.css">
+        <meta http-equiv="refresh" content="1; url=http://campbellbjoseph.github.io/puzzler/index.html">
     </head>
 
-    <body>
-        <h1>Welcome!</h1>
-        <hr>
-        
-        <label for="size">Size (3-12):</label>
-        <input type="number" id="size" name="size" min="3" max="12">
-        <br>
-        <label for="size">Difficulty (0-2):</label>
-        <input type="number" id="diff" name="diff" min="0" max="2">
-
-        <br>
-        <button onclick="proceed()" class = "button">Start</button>
-
-        <script>
-            function proceed() {
-                location.href = "kenken.html?" + document.getElementById("size").value + "|" + document.getElementById("diff").value;
-            }
-        </script>
-    </body>
-
+    <script>
+        window.location.href = "http://campbellbjoseph.github.io/puzzler/index.html"
+      </script>
 
 </html>
