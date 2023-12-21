@@ -8,9 +8,40 @@ var numSelected = null;
 var tileSelected = null;
 var solution = null;
 var deleting = false;
+var won = false;
+var count = 0;
+var sec = 0;
+var min = 0;
 
 window.onload = function() {
+    stopwatch();
     setGame();
+}
+
+function stopwatch() {
+    if (won == false) {
+        count++;
+        if (count == 100) {
+            sec++;
+            count = 0;
+        }
+        if (sec == 60) {
+            min++;
+            sec = 0;
+        }
+        let secstr = sec;
+        let minstr = min;
+        if (min < 10) { 
+            minstr = "0" + minstr; 
+        } 
+  
+        if (sec < 10) { 
+            secstr = "0" + secstr; 
+        } 
+        document.getElementById('min').innerHTML = minstr; 
+        document.getElementById('sec').innerHTML = secstr; 
+        setTimeout(stopwatch, 10);
+    }
 }
 
 function zero2D(k) {
@@ -416,7 +447,7 @@ function checkPuzzle() {
     }
     if (errors == 0) {
         let messages = ["You win!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
-
+        won = true;
         document.getElementById("title").innerHTML = "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
           
     } else {
