@@ -299,6 +299,7 @@ function setGame() {
 
 function add_note(tile, note) {
     let coords = tile.id.split("-"); //["0", "0"]
+    note = parseInt(note);
     let r = parseInt(coords[0]);
     let c = parseInt(coords[1]);
     let taken = new Array();
@@ -316,22 +317,30 @@ function add_note(tile, note) {
             }
         }
     }
+    let added = false;
+    let removed = false;
     if (taken.includes(note) == false) {
         if (notes.has(tile.id)) {
             let arr = notes.get(tile.id);
             //console.log(arr)
-            if (note in arr == false) {
+            if (arr.includes(note) == false) {
                 arr.push(note);
                 arr.sort();
                 notes.set(tile.id, arr);
+                added = true;
+            } else {
+                arr.splice(arr.indexOf(note), 1)
+                notes.set(tile.id, arr);
+                removed = true;
             }
         } else {
             notes.set(tile.id, [note]);
+            added = true;
         }
-        write_notes(tile);
+        write_notes(tile, added, removed);
     }
 }
-function clear_notes(tile, adding) {
+function clear_notes(tile, adding, removed) {
     if (notes.has(tile.id)) {
         let tile_notes = notes.get(tile.id)
         let val = 0;
@@ -339,10 +348,18 @@ function clear_notes(tile, adding) {
             val = tile_notes.length - 1;
         }
         else {
-            val = tile_notes.length;
-            notes.set(tile.id, [])
+            if (removed) {
+                console.log("For some reason we are removing like this")
+                val = tile_notes.length + 1;
+            } else {
+                val = tile_notes.length;
+            }
         }
-        //console.log(val);
+        console.log("-----")
+        console.log("Calling clear_notes")
+        console.log(tile)
+        console.log(val);
+        console.log(notes.get(tile.id))
         for (let i = 0; i < val; i++) {
             let prev = document.getElementById(tile.id + ":note" + i.toString());
             prev.remove();
@@ -356,7 +373,7 @@ function update_all_notes() {
             let t = document.getElementById(i.toString() + "-" + j.toString());
             if (notes.has(t.id)) {
                 let k = notes.get(t.id).slice();
-                clear_notes(t, false);
+                clear_notes(t, false, false);
                 for (let q = 0; q < k.length; q++) {
                     console.log(t, k[q])
                     add_note(t, k[q]);
@@ -366,9 +383,9 @@ function update_all_notes() {
     }
 }
 
-function write_notes(tile) {
-    let tile_notes = notes.get(tile.id)
-    clear_notes(tile, true);
+function write_notes(tile, adding, removed) {
+    let tile_notes = notes.get(tile.id) 
+    clear_notes(tile, adding, removed);
     for (let i = 0; i < tile_notes.length; i++) {
         let note_div = document.createElement("div");
         note_div.innerText = tile_notes[i].toString();
@@ -426,7 +443,8 @@ function updateTile(tile, number) {
             tile.classList.remove("wrong-tile");
         }
         if (edited) {
-            clear_notes(tile, false);
+            clear_notes(tile, false, false);
+            notes.set(tile.id, [])
             update_all_notes();
         }
     }
@@ -673,12 +691,46 @@ function takeNotes() {
     no.innerText = "Stop";
     no.removeEventListener("click", takeNotes);
     no.addEventListener("click", stopNotes);
+
+    let plus = document.createElement("div");
+    plus.id = "+"
+    plus.innerText = "+"
+    plus.classList.add("number")
+    plus.style.backgroundColor = "gray"
+    plus.addEventListener("click", add_all)
+    document.getElementById("digits").append(plus);
+
+    let minus = document.createElement("div");
+    minus.id = "-"
+    minus.innerText = "-"
+    minus.classList.add("number")
+    minus.style.backgroundColor = "gray"
+    minus.addEventListener("click", subtract_all);
+    document.getElementById("digits").append(minus);
 }
 
+function add_all() {
+    if (tileSelected) {
+        notes.set(tileSelected, []);
+        for (let i = 1; i <= n; i++) {
+            add_note(tileSelected, i);
+        }
+    }
+}
+
+function subtract_all() {
+    if (tileSelected) {
+        clear_notes(tileSelected, false, false);
+        notes.set(tileSelected.id, [])
+    }
+}
 function stopNotes() {
     takingNotes = false;
     let no = document.getElementById("note");
     no.innerText = "Note";
     no.removeEventListener("click", stopNotes);
     no.addEventListener("click", takeNotes);
+    document.getElementById("+").remove();
+    document.getElementById("-").remove();
+
 }
