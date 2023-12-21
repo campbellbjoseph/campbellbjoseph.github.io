@@ -9,12 +9,14 @@ var numSelected = null;
 var tileSelected = null;
 var solution = null;
 var deleting = false;
+var takingNotes = false;
 var won = false;
 var count = 0;
 var sec = 0;
 var min = 0;
 var tileHovered = null;
 
+var notes = new Map();
 
 window.onload = function() {
     setGame();
@@ -248,6 +250,15 @@ function setGame() {
     del.addEventListener("click", startDeleting);
     document.getElementById("buttons").append(del);
 
+    let note = document.createElement("div");
+    note.id = "note";
+    note.innerText = "Note"
+    note.classList.add("noteButton");
+    note.addEventListener("mouseenter", hoverNote);
+    note.addEventListener("mouseleave", exitNote);
+    note.addEventListener("click", takeNotes);
+    document.getElementById("buttons").append(note);
+
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
             if ((zero_allowed == false && event.code != "Digit0") || zero_allowed) {
@@ -286,8 +297,56 @@ function setGame() {
     }
 }
 
+function add_note(tile, note) {
+    if (notes.has(tile.id)) {
+        let arr = notes.get(tile.id);
+        console.log(arr)
+        if (note in arr == false) {
+            arr.push(note);
+            arr.sort();
+            notes.set(tile.id, arr);
+        }
+    } else {
+        notes.set(tile.id, [note]);
+    }
+    write_notes(tile);
+}
+function clear_notes(tile, adding) {
+    let tile_notes = notes.get(tile.id)
+    let val = 0;
+    if (adding) {
+        val = tile_notes.length - 1;
+    }
+    else {
+        val = tile_notes.length;
+        notes.set(tile.id, [])
+    }
+    console.log(val);
+    for (let i = 0; i < val; i++) {
+        let prev = document.getElementById(tile.id + ":note" + i.toString());
+        prev.remove();
+    }
+}
+
+function write_notes(tile) {
+    let tile_notes = notes.get(tile.id)
+    clear_notes(tile, true);
+    for (let i = 0; i < tile_notes.length; i++) {
+        let note_div = document.createElement("div");
+        note_div.innerText = tile_notes[i].toString();
+        note_div.id = tile.id + ":note" + i.toString();
+        note_div.classList.add("note");
+        note_div.style.marginLeft = (i * 13).toString() + "%";
+        tile.append(note_div);
+    }
+}
+
 
 function updateTile(tile, number) {
+    if (takingNotes) {
+        add_note(tile, number);
+        return;
+    }
     resetButtons();
     let coords = tile.id.split("-"); //["0", "0"]
     let r = parseInt(coords[0]);
@@ -311,12 +370,14 @@ function updateTile(tile, number) {
             }
         }
     }
-
+    let edited = false;
     if (tile.innerHTML.length == 0 || tile.innerHTML[0] == "<") {
         tile.innerHTML  = number + tile.innerHTML;
+        edited = true;
     }
     else if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
         tile.innerHTML  = number + tile.innerHTML.slice(1);
+        edited = true;
     }
 
     if (error) {
@@ -325,6 +386,9 @@ function updateTile(tile, number) {
     else {
         if (tile.classList.contains("wrong-tile")) {
             tile.classList.remove("wrong-tile");
+        }
+        if (edited) {
+            clear_notes(tile, false);
         }
     }
 }
@@ -544,7 +608,7 @@ function resetButtons() {
 function startDeleting() {
     deleting = true;
     let d = document.getElementById("del");
-    d.innerText = "Stop"
+    d.innerText = "Stop";
     d.removeEventListener("click", startDeleting);
     d.addEventListener("click", stopDeleting);
 }
@@ -552,7 +616,30 @@ function startDeleting() {
 function stopDeleting() {
     deleting = false;
     let d = document.getElementById("del");
-    d.innerText = "Delete"
+    d.innerText = "Delete";
     d.removeEventListener("click", stopDeleting);
     d.addEventListener("click", startDeleting);
+}
+
+function hoverNote() {
+    this.classList.add("note-hovered");
+}
+
+function exitNote() {
+    this.classList.remove("note-hovered");
+}
+function takeNotes() {
+    takingNotes = true;
+    let no = document.getElementById("note");
+    no.innerText = "Stop";
+    no.removeEventListener("click", takeNotes);
+    no.addEventListener("click", stopNotes);
+}
+
+function stopNotes() {
+    takingNotes = false;
+    let no = document.getElementById("note");
+    no.innerText = "Note";
+    no.removeEventListener("click", stopNotes);
+    no.addEventListener("click", takeNotes);
 }

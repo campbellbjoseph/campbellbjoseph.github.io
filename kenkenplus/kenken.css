@@ -47,6 +47,20 @@ hr {
     left: 0;
 }
 
+.note {
+    width: 10px;
+    height: 12px;
+    margin-bottom: 5%;
+    margin-left: 0%;
+
+    justify-content: left;
+    position: absolute;
+    font-size: 12px;
+    font-weight: bold;
+    bottom: 0;
+    left: 0;
+}
+
 #digits {
     width: 500px;
     height: 50px;
@@ -124,6 +138,21 @@ hr {
     align-items: center;
 }
 
+.noteButton {
+    width: 68px;
+    height: 44px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: rgb(230, 233, 25);
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .number-selected {
     background-color: gray;
 }
@@ -186,6 +215,10 @@ hr {
 
 .number-hovered {
     background-color: rgb(255, 249, 185);
+}
+
+.note-hovered {
+    background-color: rgb(229, 229, 94);
 }
 
 .del-hovered {
