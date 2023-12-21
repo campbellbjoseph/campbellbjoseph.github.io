@@ -298,33 +298,71 @@ function setGame() {
 }
 
 function add_note(tile, note) {
-    if (notes.has(tile.id)) {
-        let arr = notes.get(tile.id);
-        console.log(arr)
-        if (note in arr == false) {
-            arr.push(note);
-            arr.sort();
-            notes.set(tile.id, arr);
+    let coords = tile.id.split("-"); //["0", "0"]
+    let r = parseInt(coords[0]);
+    let c = parseInt(coords[1]);
+    let taken = new Array();
+    for (let i = 0; i < n; i++) {
+        if (i != r) {
+            let t = document.getElementById(i.toString() + "-" + c.toString());
+            if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                taken.push(parseInt(t.innerHTML[0]))
+            }
         }
-    } else {
-        notes.set(tile.id, [note]);
+        if (i != c) {
+            let t = document.getElementById(r.toString() + "-" + i.toString());
+            if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                taken.push(parseInt(t.innerHTML[0]))
+            }
+        }
     }
-    write_notes(tile);
+    if (taken.includes(note) == false) {
+        if (notes.has(tile.id)) {
+            let arr = notes.get(tile.id);
+            //console.log(arr)
+            if (note in arr == false) {
+                arr.push(note);
+                arr.sort();
+                notes.set(tile.id, arr);
+            }
+        } else {
+            notes.set(tile.id, [note]);
+        }
+        write_notes(tile);
+    }
 }
 function clear_notes(tile, adding) {
-    let tile_notes = notes.get(tile.id)
-    let val = 0;
-    if (adding) {
-        val = tile_notes.length - 1;
+    if (notes.has(tile.id)) {
+        let tile_notes = notes.get(tile.id)
+        let val = 0;
+        if (adding) {
+            val = tile_notes.length - 1;
+        }
+        else {
+            val = tile_notes.length;
+            notes.set(tile.id, [])
+        }
+        //console.log(val);
+        for (let i = 0; i < val; i++) {
+            let prev = document.getElementById(tile.id + ":note" + i.toString());
+            prev.remove();
+        }
     }
-    else {
-        val = tile_notes.length;
-        notes.set(tile.id, [])
-    }
-    console.log(val);
-    for (let i = 0; i < val; i++) {
-        let prev = document.getElementById(tile.id + ":note" + i.toString());
-        prev.remove();
+}
+
+function update_all_notes() {
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            let t = document.getElementById(i.toString() + "-" + j.toString());
+            if (notes.has(t.id)) {
+                let k = notes.get(t.id).slice();
+                clear_notes(t, false);
+                for (let q = 0; q < k.length; q++) {
+                    console.log(t, k[q])
+                    add_note(t, k[q]);
+                }
+            }
+        }
     }
 }
 
@@ -389,6 +427,7 @@ function updateTile(tile, number) {
         }
         if (edited) {
             clear_notes(tile, false);
+            update_all_notes();
         }
     }
 }
