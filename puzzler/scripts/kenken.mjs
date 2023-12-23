@@ -283,6 +283,9 @@ function setGame() {
         if (event.code == "KeyD" || event.code == "Keyd") {
             startDeleting();
         }
+        if (event.code == "KeyU") {
+            undo_insertion();
+        }
     });
 
     if (n <= 10) {
@@ -547,7 +550,11 @@ function updateTile(tile, number) {
     }
 
     if (error) {
+        lastInsertion = [tile, number];
         tile.classList.add("wrong-tile");
+        if (document.getElementById("undo") == null) {
+            add_undo();
+        }
     } 
     else {
         if (tile.classList.contains("wrong-tile")) {
@@ -802,9 +809,18 @@ function displayWin() {
     b.type = "submit";
     b.value = "New game";
     b.classList.add("new_game");
-
+    lock_buttons();
     document.getElementById("buttons").append(new_game);
     document.getElementById("new_game").append(b);
+    
+}
+
+function lock_buttons() {
+    document.getElementById("submit").removeEventListener("click", checkMistakes);
+    document.getElementById("del").removeEventListener("click", startDeleting);
+    document.getElementById("reset").removeEventListener("click", resetBoard);
+    document.getElementById("note").removeEventListener("click", takeNotes);
+    document.getElementById("undo").removeEventListener("click", undo_insertion);
 }
 
 function clearMistakes() {
@@ -938,9 +954,11 @@ function undo_insertion() {
         startDeleting();
         clearTile(tile);
         stopDeleting();
-        for (let i = 0; i < affectedTiles.length; i++) {
-            let t = affectedTiles[i];
-            handleNote(t, val);
+        if (affectedTiles != null) {
+            for (let i = 0; i < affectedTiles.length; i++) {
+                let t = affectedTiles[i];
+                handleNote(t, val);
+            }
         }
         cleanSlate(tile);
         resolveTile(tile);
