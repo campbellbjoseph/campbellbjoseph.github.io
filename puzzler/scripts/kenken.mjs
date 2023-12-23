@@ -935,15 +935,18 @@ function stopNotes() {
 }
 
 function resetBoard() {
-    resetButtons();
-    startDeleting();
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            let t = document.getElementById(i.toString() + "-" + j.toString());
-            t.click();
+    if (confirm("Are you sure you want to reset?")) {
+        resetButtons();
+        startDeleting();
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let t = document.getElementById(i.toString() + "-" + j.toString());
+                t.click();
+            }
         }
-    }
-    stopDeleting();
+        stopDeleting();
+    }   
+    
 }
 
 function undo_insertion() {
