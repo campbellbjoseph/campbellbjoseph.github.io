@@ -271,7 +271,7 @@ function setGame() {
                 }
             }
         }
-        if (event.code == "Space") {
+        if (event.code == "ShiftLeft" || event.code == "ShiftRight") {
             resetButtons();
         }
         if (event.code == "Enter") {
