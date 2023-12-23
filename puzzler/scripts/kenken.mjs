@@ -251,6 +251,16 @@ function setGame() {
     document.getElementById("buttons").append(note);
     add_pencil();
 
+    let reset = document.createElement("div");
+    reset.id = "reset";
+    reset.innerText = "";
+    reset.classList.add("reset");
+    reset.addEventListener("mouseenter", hoverReset);
+    reset.addEventListener("mouseleave", exitReset);
+    reset.addEventListener("click", resetBoard);
+    document.getElementById("buttons").append(reset);
+    add_reset();
+
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
             if ((zero_allowed == false && event.code != "Digit0") || zero_allowed) {
@@ -356,6 +366,14 @@ function add_trash() {
     trash_image.src = "../puzzler/images/trash.png"
     trash_image.id = "trash"
     d.append(trash_image);
+}
+
+function add_reset() {
+    let d = document.getElementById("reset");
+    let reset_image = document.createElement("img");
+    reset_image.src = "../puzzler/images/reset.png"
+    reset_image.id = "reset"
+    d.append(reset_image);
 }
 
 function add_pencil() {
@@ -548,15 +566,21 @@ function selectNumber() {
     }
 }
 
-function selectTile() {
+function clearTile(tile) {
     if (deleting) {
-        if (this.innerHTML.length > 0 && this.innerHTML[0] != "<") {
-            this.innerHTML  = this.innerHTML.slice(1);
+        if (tile.innerHTML.length > 0 && tile.innerHTML[0] != "<") {
+            tile.innerHTML  = tile.innerHTML.slice(1);
             //console.log(this.classList)
-            if (this.classList.contains("wrong-tile")){
-                this.classList.remove("wrong-tile");
+            if (tile.classList.contains("wrong-tile")){
+                tile.classList.remove("wrong-tile");
             }
         }
+    }
+}
+
+function selectTile() {
+    if (deleting) {
+        clearTile(this);
     } else {
         if (numSelected) {
             updateTile(this, numSelected.id);
@@ -603,6 +627,13 @@ function exitDel() {
     this.classList.remove("del-hovered");
 }
 
+function hoverReset() {
+    this.classList.add("reset-hovered");
+}
+
+function exitReset() {
+    this.classList.remove("reset-hovered");
+}
 
 function hoverCheck() {
     this.classList.add("check-hovered");
@@ -685,8 +716,8 @@ function checkMistakes() {
 }
 
 function displayWin() {
-    let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Run Forrest run!", "Speedy Gonzalez!", "Speedster!"]
-    let fast_messages = ["Quick!", "Super star!", "Fast as lightning!", "Heroic.", "Legendary!"]
+    let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Fast as lightning!", "Speedy Gonzalez!", "Speedster!"]
+    let fast_messages = ["Quick!", "Super star!", "Run Forrest run!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
     let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there", "Impressive!"];
 
@@ -694,7 +725,7 @@ function displayWin() {
     let arr = null;
     let speed = 0;
 
-    let sf_cutoff = [0,0,0,15,30,75,135,240,480,600,900,1200,1800]
+    let sf_cutoff = [0,0,0,15,30,75,120,240,480,600,900,1200,1800]
     let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
     let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
 
@@ -710,6 +741,7 @@ function displayWin() {
     } else if (score <= r) {
         arr = messages;
     } else {
+        speed = -1;
         arr = slow_messages;
     }
 
@@ -721,7 +753,20 @@ function displayWin() {
     if (speed == 2) {
         document.getElementById("title").innerHTML += "<h1>&#x1F525 &#x1F525</h1>"
     }
-    
+    if (speed == -1) {
+        document.getElementById("title").innerHTML += "<h1>&#x1F422</h1>"
+    }
+    let new_game = document.createElement("form");
+    new_game.action = "/puzzler/index.html";
+    new_game.id = "new_game";
+    new_game.classList.add()
+    let b = document.createElement("input");
+    b.type = "submit";
+    b.value = "New game";
+    b.classList.add("new_game");
+
+    document.getElementById("buttons").append(new_game);
+    document.getElementById("new_game").append(b);
 }
 
 function clearMistakes() {
@@ -833,4 +878,16 @@ function stopNotes() {
         add_pencil();
     }
     
+}
+
+function resetBoard() {
+    resetButtons();
+    startDeleting();
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            let t = document.getElementById(i.toString() + "-" + j.toString());
+            t.click();
+        }
+    }
+    stopDeleting();
 }
