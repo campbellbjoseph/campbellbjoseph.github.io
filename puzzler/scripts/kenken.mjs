@@ -268,6 +268,9 @@ function setGame() {
         if (event.code == "KeyN" || event.code == "Keyn") {
             takeNotes();
         }
+        if (event.code == "KeyD" || event.code == "Keyd") {
+            startDeleting();
+        }
     });
 
     if (n <= 10) {
