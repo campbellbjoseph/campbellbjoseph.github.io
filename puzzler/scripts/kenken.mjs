@@ -265,6 +265,9 @@ function setGame() {
         if (event.code == "Enter") {
             checkMistakes();
         }
+        if (event.code == "KeyN" || event.code == "Keyn") {
+            takeNotes();
+        }
     });
 
     if (n <= 10) {
@@ -662,9 +665,7 @@ function checkMistakes() {
     let errorList = findErrors();
     let errors = errorList.length;
     if (errors == 0) {
-        let messages = ["You win!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
-        won = true;
-        document.getElementById("title").innerHTML = "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
+        displayWin();
         return;
     }
 
@@ -678,6 +679,15 @@ function checkMistakes() {
         check.addEventListener("click", clearMistakes);
         add_x("check");
     }
+}
+
+function displayWin() {
+    let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Run Forrest run!", "Speedy Gonzalez!", "Speedster!"]
+    let fast_messages = ["Quick!", "Super star!", "Fast as lightning!", "Heroic.", "Legendary!"]
+    let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
+    let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there", "Impressive!"]
+    won = true;
+    document.getElementById("title").innerHTML += "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
 }
 
 function clearMistakes() {
