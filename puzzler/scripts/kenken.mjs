@@ -15,6 +15,8 @@ var count = 0;
 var sec = 0;
 var min = 0;
 var tileHovered = null;
+var lastInsertion = null;
+var affectedTiles = null;
 
 var notes = new Map();
 
@@ -368,11 +370,31 @@ function add_trash() {
     d.append(trash_image);
 }
 
+function add_undo() {
+    let undo = document.createElement("div");
+    undo.id = "undo";
+    undo.innerText = "";
+    undo.classList.add("reset");
+    undo.addEventListener("mouseenter", hoverReset);
+    undo.addEventListener("mouseleave", exitReset);
+    undo.addEventListener("click", undo_insertion);
+    let undo_image = document.createElement("img");
+    undo_image.src = "../puzzler/images/undo.png"
+    undo_image.id = "undo_image"
+    undo.append(undo_image);
+    document.getElementById("buttons").append(undo);
+}
+
+function remove_undo() {
+    let undo = document.getElementById("undo");
+    undo.remove();
+}
+
 function add_reset() {
     let d = document.getElementById("reset");
     let reset_image = document.createElement("img");
     reset_image.src = "../puzzler/images/reset.png"
-    reset_image.id = "reset"
+    reset_image.id = "reset_image"
     d.append(reset_image);
 }
 
@@ -441,16 +463,20 @@ function resolveTile(tile) {
             }
         }
     }
+    let r_val = false;
     //console.log(taken);
     if (notes.has(tile.id) && notes.get(tile.id) != null) {
         let arr = notes.get(tile.id);
-        console.log(arr.length)
+        //console.log(arr.length)
         let new_arr = new Array();
         for (let i = 0; i < arr.length; i++) {
             let note = parseInt(arr[i]);
             if (taken.includes(note) == false && new_arr.includes(note) == false) {
                 new_arr.push(note);
             }
+        }
+        if (new_arr.length != arr) {
+            r_val = true;
         }
         notes.set(tile.id, new_arr)
 
@@ -463,7 +489,7 @@ function resolveTile(tile) {
             tile.append(note_div);
         }
     }
-
+    return r_val;
 }
 
 function handleNote(tile, number) {
@@ -530,18 +556,30 @@ function updateTile(tile, number) {
         if (edited) {
             cleanSlate(tile);
             notes.set(tile.id, [])
+            affectedTiles = new Array();
             for (let i = 0; i < n; i++) {
                 if (i != r) {
                     let t = document.getElementById(i.toString() + "-" + c.toString());
                     cleanSlate(t);
-                    resolveTile(t);
+                    let change = resolveTile(t);
+                    if (change) {
+                        affectedTiles.push(t);
+                    }
                 }
                 if (i != c) {
                     let t = document.getElementById(r.toString() + "-" + i.toString());
                     cleanSlate(t);
-                    resolveTile(t);
+                    let change = resolveTile(t);
+                    if (change) {
+                        affectedTiles.push(t);
+                    }
                 }
             }
+            lastInsertion = [tile, number];
+            if (document.getElementById("undo") == null) {
+                add_undo();
+            }
+            console.log(lastInsertion);
         }
     }
 }
@@ -890,4 +928,24 @@ function resetBoard() {
         }
     }
     stopDeleting();
+}
+
+function undo_insertion() {
+    if (lastInsertion != null) {
+        resetButtons();
+        let tile = lastInsertion[0];
+        let val = lastInsertion[1];
+        startDeleting();
+        clearTile(tile);
+        stopDeleting();
+        for (let i = 0; i < affectedTiles.length; i++) {
+            let t = affectedTiles[i];
+            handleNote(t, val);
+        }
+        cleanSlate(tile);
+        resolveTile(tile);
+        lastInsertion = null;
+        affectedTiles = null;
+        remove_undo();
+    }
 }
