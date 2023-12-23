@@ -259,6 +259,12 @@ function setGame() {
                 }
             }
         }
+        if (event.code == "Space") {
+            resetButtons();
+        }
+        if (event.code == "Enter") {
+            checkMistakes();
+        }
     });
 
     if (n <= 10) {
@@ -675,45 +681,47 @@ function checkMistakes() {
 }
 
 function clearMistakes() {
-    let mistakeList = findMistakes();
-    let mistakes = mistakeList.length;
-    for (let i = 0; i < mistakes; i++) {
-        mistakeList[i].classList.remove("wrong-tile");
+    let x = document.getElementById("x_check")
+    if (x) {
+        let mistakeList = findMistakes();
+        let mistakes = mistakeList.length;
+        for (let i = 0; i < mistakes; i++) {
+            mistakeList[i].classList.remove("wrong-tile");
+        }
+        let check = document.getElementById("submit"); 
+        check.removeEventListener("click", clearMistakes);
+        check.innerText = "";
+        check.addEventListener("click", checkMistakes);
+        add_check()
     }
-
-    this.removeEventListener("click", clearMistakes);
-    this.innerText = "";
-    this.addEventListener("click", checkMistakes);
-    add_check()
 }
 
 function resetButtons() {
-    let submit = document.getElementById("submit");
-    if (submit.innerText == "Clear") {
-        submit.removeEventListener("click", clearErrors);
-        submit.innerText = "Submit";
-        submit.addEventListener("click", checkPuzzle);
-    }
-
     stopDeleting();
+    stopNotes();
+    clearMistakes();
 }
 
 function startDeleting() {
-    deleting = true;
-    let d = document.getElementById("del");
-    d.innerText = "";
-    d.removeEventListener("click", startDeleting);
-    d.addEventListener("click", stopDeleting);
-    add_x("trash");
+    if (deleting == false) {
+        deleting = true;
+        let d = document.getElementById("del");
+        d.innerText = "";
+        d.removeEventListener("click", startDeleting);
+        d.addEventListener("click", stopDeleting);
+        add_x("trash");
+    }
 }
 
 function stopDeleting() {
-    deleting = false;
-    let d = document.getElementById("del");
-    d.innerText = "";
-    d.removeEventListener("click", stopDeleting);
-    d.addEventListener("click", startDeleting);
-    add_trash();
+    if (deleting == true) {
+        deleting = false;
+        let d = document.getElementById("del");
+        d.innerText = "";
+        d.removeEventListener("click", stopDeleting);
+        d.addEventListener("click", startDeleting);
+        add_trash();
+    }
 }
 
 function hoverNote() {
@@ -725,28 +733,31 @@ function exitNote() {
 }
 
 function takeNotes() {
-    takingNotes = true;
-    let no = document.getElementById("note");
-    no.innerText = "";
-    no.removeEventListener("click", takeNotes);
-    no.addEventListener("click", stopNotes);
-    add_x("note");
+    if (takingNotes == false) {
+        takingNotes = true;
+        let no = document.getElementById("note");
+        no.innerText = "";
+        no.removeEventListener("click", takeNotes);
+        no.addEventListener("click", stopNotes);
+        add_x("note");
 
-    let plus = document.createElement("div");
-    plus.id = "+"
-    plus.innerText = "+"
-    plus.classList.add("number")
-    plus.style.backgroundColor = "gray"
-    plus.addEventListener("click", add_all)
-    document.getElementById("digits").append(plus);
+        let plus = document.createElement("div");
+        plus.id = "+"
+        plus.innerText = "+"
+        plus.classList.add("number")
+        plus.style.backgroundColor = "gray"
+        plus.addEventListener("click", add_all)
+        document.getElementById("digits").append(plus);
 
-    let minus = document.createElement("div");
-    minus.id = "-"
-    minus.innerText = "-"
-    minus.classList.add("number")
-    minus.style.backgroundColor = "gray"
-    minus.addEventListener("click", subtract_all);
-    document.getElementById("digits").append(minus);
+        let minus = document.createElement("div");
+        minus.id = "-"
+        minus.innerText = "-"
+        minus.classList.add("number")
+        minus.style.backgroundColor = "gray"
+        minus.addEventListener("click", subtract_all);
+        document.getElementById("digits").append(minus);
+    }
+    
 }
 
 function add_all() {
@@ -767,13 +778,15 @@ function subtract_all() {
 }
 
 function stopNotes() {
-    takingNotes = false;
-    let no = document.getElementById("note");
-    no.innerText = "";
-    no.removeEventListener("click", stopNotes);
-    no.addEventListener("click", takeNotes);
-    document.getElementById("+").remove();
-    document.getElementById("-").remove();
-    add_pencil();
-
+    if (takingNotes == true) {
+        takingNotes = false;
+        let no = document.getElementById("note");
+        no.innerText = "";
+        no.removeEventListener("click", stopNotes);
+        no.addEventListener("click", takeNotes);
+        document.getElementById("+").remove();
+        document.getElementById("-").remove();
+        add_pencil();
+    }
+    
 }
