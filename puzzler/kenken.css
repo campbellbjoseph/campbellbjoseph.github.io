@@ -93,11 +93,11 @@ hr {
 }
 
 .submit {
-    width: 89px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     border: 1px solid black;
     margin: 2px;
-    background-color: rgb(30, 227, 30);
+    background-color:white;
 
     /* Text */
     font-size: 20px;
@@ -107,27 +107,18 @@ hr {
     align-items: center;
 }
 
-.check {
-    width: 89px;
-    height: 44px;
-    border: 1px solid black;
-    margin: 2px;
-    background-color: rgb(117, 217, 251);
+img {
+    width: 40px;
+    height: 40px;
+  }
 
-    /* Text */
-    font-size: 20px;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 .del {
-    width: 89px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     border: 1px solid black;
     margin: 2px;
-    background-color: rgb(235, 38, 38);
+    background-color: white;
 
     /* Text */
     font-size: 20px;
@@ -138,11 +129,11 @@ hr {
 }
 
 .noteButton {
-    width: 68px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     border: 1px solid black;
     margin: 2px;
-    background-color: rgb(230, 233, 25);
+    background-color: white;
 
     /* Text */
     font-size: 20px;
@@ -205,11 +196,7 @@ hr {
 }
 
 .submit-hovered {
-    background-color: rgb(85, 242, 85);
-}
-
-.check-hovered {
-    background-color: rgb(155, 230, 255);
+    background-color: #489f4a;
 }
 
 .number-hovered {
@@ -217,7 +204,7 @@ hr {
 }
 
 .note-hovered {
-    background-color: rgb(229, 229, 94);
+    background-color: rgb(107, 107, 231);
 }
 
 .del-hovered {

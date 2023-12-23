@@ -225,39 +225,31 @@ function setGame() {
     }
     let submit = document.createElement("div");
     submit.id = "submit";
-    submit.innerText = "Submit";
     submit.classList.add("submit");
-    submit.addEventListener("click", checkPuzzle);
+    submit.addEventListener("click", checkMistakes);
     submit.addEventListener("mouseenter", hoverSubmit);
     submit.addEventListener("mouseleave", exitSubmit);
     document.getElementById("buttons").append(submit);
-
-    let check = document.createElement("div");
-    check.id = "check";
-    check.innerText = "Check";
-    check.classList.add("check");
-    check.addEventListener("click", checkMistakes);
-    check.addEventListener("mouseenter", hoverCheck);
-    check.addEventListener("mouseleave", exitCheck);
-    document.getElementById("buttons").append(check);
+    add_check();
 
     let del = document.createElement("div");
     del.id = "del";
-    del.innerText = "Delete"
     del.classList.add("del");
     del.addEventListener("mouseenter", hoverDel);
     del.addEventListener("mouseleave", exitDel);
     del.addEventListener("click", startDeleting);
     document.getElementById("buttons").append(del);
+    add_trash();
 
     let note = document.createElement("div");
     note.id = "note";
-    note.innerText = "Note"
+    note.innerText = ""
     note.classList.add("noteButton");
     note.addEventListener("mouseenter", hoverNote);
     note.addEventListener("mouseleave", exitNote);
     note.addEventListener("click", takeNotes);
     document.getElementById("buttons").append(note);
+    add_pencil();
 
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
@@ -297,6 +289,74 @@ function setGame() {
     }
 }
 
+function add_check() {
+    let s = document.getElementById("submit");
+    let x = document.getElementById("x_check")
+    if (x) {
+        x.remove();
+    }
+    let checkmark_image = document.createElement("img");
+    checkmark_image.src = "../puzzler/images/check.png"
+    checkmark_image.id = "check";
+    s.append(checkmark_image);
+}
+
+function add_x(b) {
+    let s = null;
+    if (b == "check") {
+        s = document.getElementById("submit")
+        let c = document.getElementById("check");
+        if (c) {
+            c.remove();
+            rem = true;
+        }
+    }
+    if (b == "trash") {
+        s = document.getElementById("del")
+        let d = document.getElementById("trash");
+        if (d) {
+            d.remove();
+            rem = true
+        }
+    }
+    if (b == "note") {
+        s = document.getElementById("note")
+        let d = document.getElementById("pencil");
+        if (d) {
+            d.remove();
+            rem = true
+        }
+    }
+    let x_image = document.createElement("img");
+    x_image.src = "../puzzler/images/x.png";
+    x_image.id = "x_" + b;
+    s.append(x_image);
+    
+}
+
+function add_trash() {
+    let d = document.getElementById("del");
+    let x = document.getElementById("x_trash")
+    if (x) {
+        x.remove();
+    }
+    let trash_image = document.createElement("img");
+    trash_image.src = "../puzzler/images/trash.png"
+    trash_image.id = "trash"
+    d.append(trash_image);
+}
+
+function add_pencil() {
+    let p = document.getElementById("note");
+    let x = document.getElementById("x_note");
+    if (x) {
+        x.remove();
+    }
+    let pencil_image = document.createElement("img");
+    pencil_image.src = "../puzzler/images/pencil.png"
+    pencil_image.id = "pencil"
+    p.append(pencil_image);
+}
 
 function addNote(tile, note) {
     if (notes.has(tile.id)) {
@@ -584,40 +644,6 @@ function findMistakes() {
     return mistakeList;
 }
 
-function checkPuzzle() {
-    stopDeleting()
-    let errorList = findErrors();
-    let errors = errorList.length;
-    
-    for (let i = 0; i < errors; i++) {
-        errorList[i].classList.add("wrong-tile");
-    }
-    if (errors == 0) {
-        let messages = ["You win!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
-        won = true;
-        document.getElementById("title").innerHTML = "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
-          
-    } else {
-        console.log(errors);
-        let submit = document.getElementById("submit");
-        submit.innerText = "Clear";
-        submit.removeEventListener("click", checkPuzzle);
-        submit.addEventListener("click", clearErrors);
-    }
-}
-
-function clearErrors() {
-    let errorList = findErrors();
-    let errors = errorList.length;
-    for (let i = 0; i < errors; i++) {
-        errorList[i].classList.remove("wrong-tile");
-    }
-
-    this.removeEventListener("click", clearErrors);
-    this.innerText = "Submit";
-    this.addEventListener("click", checkPuzzle);
-}
-
 function checkMistakes() {
     stopDeleting();
     let mistakeList = findMistakes();
@@ -627,14 +653,24 @@ function checkMistakes() {
         mistakeList[i].classList.add("wrong-tile");
     }
 
+    let errorList = findErrors();
+    let errors = errorList.length;
+    if (errors == 0) {
+        let messages = ["You win!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
+        won = true;
+        document.getElementById("title").innerHTML = "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
+        return;
+    }
+
+
     if (mistakes == 0) {
         console.log("Success!");
     } else {
-        console.log(mistakes);
-        let check = document.getElementById("check");
-        check.innerText = "Clear";
+        let check = document.getElementById("submit");
+        check.innerText = "";
         check.removeEventListener("click", checkMistakes);
         check.addEventListener("click", clearMistakes);
+        add_x("check");
     }
 }
 
@@ -646,8 +682,9 @@ function clearMistakes() {
     }
 
     this.removeEventListener("click", clearMistakes);
-    this.innerText = "Check";
+    this.innerText = "";
     this.addEventListener("click", checkMistakes);
+    add_check()
 }
 
 function resetButtons() {
@@ -658,30 +695,25 @@ function resetButtons() {
         submit.addEventListener("click", checkPuzzle);
     }
 
-    let check = document.getElementById("check");
-    if (check.innerText == "Clear") {
-        check.removeEventListener("click", clearMistakes);
-        check.innerText = "Check";
-        check.addEventListener("click", checkMistakes);
-    }
-
     stopDeleting();
 }
 
 function startDeleting() {
     deleting = true;
     let d = document.getElementById("del");
-    d.innerText = "Stop";
+    d.innerText = "";
     d.removeEventListener("click", startDeleting);
     d.addEventListener("click", stopDeleting);
+    add_x("trash");
 }
 
 function stopDeleting() {
     deleting = false;
     let d = document.getElementById("del");
-    d.innerText = "Delete";
+    d.innerText = "";
     d.removeEventListener("click", stopDeleting);
     d.addEventListener("click", startDeleting);
+    add_trash();
 }
 
 function hoverNote() {
@@ -691,12 +723,14 @@ function hoverNote() {
 function exitNote() {
     this.classList.remove("note-hovered");
 }
+
 function takeNotes() {
     takingNotes = true;
     let no = document.getElementById("note");
-    no.innerText = "Stop";
+    no.innerText = "";
     no.removeEventListener("click", takeNotes);
     no.addEventListener("click", stopNotes);
+    add_x("note");
 
     let plus = document.createElement("div");
     plus.id = "+"
@@ -731,13 +765,15 @@ function subtract_all() {
         notes.set(tileSelected.id, []);
     }
 }
+
 function stopNotes() {
     takingNotes = false;
     let no = document.getElementById("note");
-    no.innerText = "Note";
+    no.innerText = "";
     no.removeEventListener("click", stopNotes);
     no.addEventListener("click", takeNotes);
     document.getElementById("+").remove();
     document.getElementById("-").remove();
+    add_pencil();
 
 }
