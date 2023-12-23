@@ -685,9 +685,40 @@ function displayWin() {
     let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Run Forrest run!", "Speedy Gonzalez!", "Speedster!"]
     let fast_messages = ["Quick!", "Super star!", "Fast as lightning!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
-    let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there", "Impressive!"]
+    let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there", "Impressive!"];
+
+    let score = 60 * min + sec;
+    let arr = null;
+    let speed = 0;
+
+    let sf_cutoff = [0,0,0,15,30,75,135,240,480,600,900,1200,1800]
+    let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
+    let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
+
+    let sf = sf_cutoff[n]*(1+0.1*diff);
+    let f = f_cutoff[n]*(1+0.1*diff);
+    let r = r_cutoff[n]*(1+0.1*diff);
+    if (score <= sf) {
+        arr = super_fast_messages;
+        speed = 2;
+    } else if (score <= f) {
+        arr = fast_messages;
+        speed = 1;
+    } else if (score <= r) {
+        arr = messages;
+    } else {
+        arr = slow_messages;
+    }
+
     won = true;
-    document.getElementById("title").innerHTML += "<h1>" + messages[Math.floor(Math.random() * (messages.length - 1))] +"</h1>";
+    document.getElementById("title").innerHTML += "<h1>" + arr[Math.floor(Math.random() * (arr.length) - 0.0001)] +"</h1>";
+    if (speed == 1) {
+        document.getElementById("title").innerHTML += "<h1>&#x1F525</h1>"
+    } 
+    if (speed == 2) {
+        document.getElementById("title").innerHTML += "<h1>&#x1F525 &#x1F525</h1>"
+    }
+    
 }
 
 function clearMistakes() {
