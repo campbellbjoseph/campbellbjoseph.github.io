@@ -24,17 +24,17 @@ var lastInsertion = null;
 var affectedTiles = null;
 var given = new Array();
 var used_notes = false;
+var paused = false;
 
 var notes = new Map();
 
 window.onload = function() {
     setGame();
-    stopwatch();
     
 }
 
 function stopwatch() {
-    if (won == false) {
+    if (won == false && paused == false) {
         count++;
         if (count == 100) {
             sec++;
@@ -289,6 +289,15 @@ function setGame() {
     document.getElementById("buttons").append(reset);
     add_reset();
 
+    let pause = document.createElement("div");
+    pause.id = "pause";
+    pause.innerText = "";
+    pause.classList.add("pause");
+    pause.addEventListener("mouseenter", hoverReset);
+    pause.addEventListener("mouseleave", exitReset);
+    document.getElementById("title").append(pause);
+    add_pause();
+
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
             if ((zero_allowed == false && event.code != "Digit0") || zero_allowed) {
@@ -355,6 +364,35 @@ function add_check() {
     checkmark_image.src = "../puzzler/images/check.png"
     checkmark_image.id = "check";
     s.append(checkmark_image);
+}
+
+function add_pause() {
+    paused = false;
+    let p = document.getElementById("pause");
+    p.removeEventListener("click", add_pause);
+    let play = document.getElementById("play_image");
+    if (play) {
+        play.remove();
+    }
+    let p_image = document.createElement("img");
+    p_image.src = "../puzzler/images/pause.png"
+    p_image.id = "pause_image";
+    p.addEventListener("click", pause_time);
+    p.append(p_image);
+    stopwatch();
+}
+
+function pause_time() {
+    let p = document.getElementById("pause");
+    p.removeEventListener("click", pause_time);
+    paused = true;
+    document.getElementById("pause_image").remove();
+    let p_image = document.createElement("img");
+    p_image.src = "../puzzler/images/play.png"
+    p_image.id = "play_image";
+    
+    p.append(p_image);
+    p.addEventListener("click", add_pause);
 }
 
 function add_x(b) {
