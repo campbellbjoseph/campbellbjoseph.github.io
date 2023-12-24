@@ -3,6 +3,7 @@ import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutio
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
 var diff = parseInt(queryString[1]);
+var mod = parseInt(queryString[2]);
 var zero_allowed = false;
 
 var numSelected = null;
@@ -95,20 +96,23 @@ function simulate(n, iter) {
 }
 
 function setGame() {
-    var out = assign_operators(n, diff);
+    var out = assign_operators(n, diff, mod);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
     var cage_operators_values = out[3];
+    var at_least_one_mod = out[4];
     let s = do_outputs(n, cage_cells, cage_operators_values);
     let att = 1;
-    while (s != 1) {
+    console.log(grid);
+    while (s != 1 && at_least_one_mod == false) {
         att++;
-        out = assign_operators(n, diff);
+        out = assign_operators(n, diff, mod);
         grid = out[0];
         cage_grid = out[1];
         cage_cells = out[2];
         cage_operators_values = out[3];
+        at_least_one_mod = out[4];
         s = do_outputs(n, cage_cells, cage_operators_values);
     }
     solution = grid;

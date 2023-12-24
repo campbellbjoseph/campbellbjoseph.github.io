@@ -25,7 +25,7 @@
         </div>
         <div id="buttons"></div>
         <div id="Instructions" style="text-align: center;">
-            <div style = "display:inline-block; text-align: left;">
+            <div style = "display:inline-block; text-align: left;" id = "actual">
                 <h3> </h3>
                 <b>N</b>: Take notes <br>
                 <b>D</b>: Delete <br>
@@ -35,10 +35,26 @@
                 <b>Enter</b>: Submit puzzle <br>
                 <b>&#x1F525 &#x1F525</b>: Super fast <br>
                 <b>&#x1F525</b>: Fast <br>
-                <b>&#x1F422</b>: Slow
+                <b>&#x1F422</b>: Slow <br>
+                <button onclick="display()" class = "button" id = "inst">Instructions</button>
             </div>
             
         </div>
+        <script>
+            function display() {
+                let d = document.getElementById("actual");
+                d.innerHTML += "<br>The objective of this game is to fill in the NxN square provided with the numbers 1-N.<br>"
+                d.innerHTML += "There are a number of different operations, which can be seen below<br>"
+                d.innerHTML += "<b>Addition (+):</b> The numbers in the cell must sum to the desired amount (e.g. 5+ => [2,3] or [1,4] in a 4x4 puzzle)<br>"
+                d.innerHTML += "<b>Subtraction (-):</b> The larger number in the cell minus the smaller number in the cell equals the desired amount (e.g. 2- => [4,2] or [3,1] in a 4x4)<br>"
+                d.innerHTML += "<b>Multiplication (x):</b> The numbers in the cell must multiply to the desired amount (e.g. 6x => [2,3] in a 4x4)<br>"
+                d.innerHTML += "<b>Division (/):</b> The larger number in the cell divided by the smaller number in the cell equals the desired amount (e.g. 2/ => [4,2] or [2,1] in a 4x4)<br>"
+                d.innerHTML += "<h4>Special Operations/Modifications (optional)<h4>"
+                d.innerHTML += "<b>Modulo (%):</b> The <u>remainder</u> when the larger number is divided by the smaller number is the desired amount (e.g. 1% => [4,3] or [3,2] in a 4x4)<br>"
+                document.getElementById("inst").onclick = "rem()";
+                document.getElementById("inst").innerText = "Clear";
+}
+        </script>
     </body>
 
 

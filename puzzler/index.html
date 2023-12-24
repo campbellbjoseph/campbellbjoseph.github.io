@@ -15,13 +15,48 @@
         <br>
         <label for="size">Difficulty (0-2):</label>
         <input type="number" id="diff" name="diff" min="0" max="2">
-
+        <br>
+        <label for="m">Modulo?</label>
+        <input type="checkbox" id="mod" name="mod">
         <br>
         <button onclick="proceed()" class = "button">Start</button>
-
+        <br>
+        <br>
+        <button onclick="display()" class = "button" id = "inst">Instructions</button>
+        <div id="bottom" style="text-align: center;"></div>
         <script>
             function proceed() {
-                location.href = "puzzle.html?" + document.getElementById("size").value + "|" + document.getElementById("diff").value;
+                let s = "puzzle.html?" + document.getElementById("size").value + 
+                "|" + document.getElementById("diff").value;
+                 
+                if (document.getElementById("mod").checked) {
+                    s += "|1"
+                } else {
+                    s += "|0"
+                }
+                location.href = s;
+            }
+            function display() {
+                let d = document.createElement("div");
+                d.style = "display:inline-block; text-align: left;";
+                d.id = "instructions"
+                d.innerHTML = "The objective of this game is to fill in the NxN square provided with the numbers 1-N.<br>"
+                d.innerHTML += "There are a number of different operations, which can be seen below<br>"
+                d.innerHTML += "<b>Addition (+):</b> The numbers in the cell must sum to the desired amount (e.g. 5+ => [2,3] or [1,4] in a 4x4 puzzle)<br>"
+                d.innerHTML += "<b>Subtraction (-):</b> The larger number in the cell minus the smaller number in the cell equals the desired amount (e.g. 2- => [4,2] or [3,1] in a 4x4)<br>"
+                d.innerHTML += "<b>Multiplication (x):</b> The numbers in the cell must multiply to the desired amount (e.g. 6x => [2,3] in a 4x4)<br>"
+                d.innerHTML += "<b>Division (/):</b> The larger number in the cell divided by the smaller number in the cell equals the desired amount (e.g. 2/ => [4,2] or [2,1] in a 4x4)<br>"
+                d.innerHTML += "<h4>Special Operations/Modifications (optional)<h4>"
+                d.innerHTML += "<b>Modulo (%):</b> The <u>remainder</u> when the larger number is divided by the smaller number is the desired amount (e.g. 1% => [4,3] or [3,2] in a 4x4)<br>"
+                document.getElementById("bottom").append(d);
+                document.getElementById("inst").onclick = "rem()";
+                document.getElementById("inst").innerText = "Clear";
+            }
+
+            function rem() {
+                document.getElementById("instructions").remove();
+                document.getElementById("inst").onclick = "display()";
+                document.getElementById("inst").innerText = "Instructions";
             }
         </script>
     </body>

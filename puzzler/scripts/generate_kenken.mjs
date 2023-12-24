@@ -163,14 +163,25 @@ function find_value(grid, operator, cells) {
         return big / small;
     }
 
-    else {
+    else if (operator == "x") {
         let ans = 1
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
             ans *= grid[cell[0]][cell[1]];
         }
         return ans
+    } 
+
+    else if (operator == "%") {
+        let c0 = cells[0];
+        let c1 = cells[1];
+        let v0 = grid[c0[0]][c0[1]];
+        let v1 = grid[c1[0]][c1[1]];
+        let big = Math.max(v0, v1);
+        let small = Math.min(v0, v1);
+        return big % small;
     }
+    return -1;
 }
 
 function is_top_left_cell(coord, cells) {
@@ -200,29 +211,44 @@ export function find_best_cell(cells) {
     return best;
 }
 
-export function assign_operators(n, difficulty) {
+export function assign_operators(n, difficulty, mod) {
     var out = create_puzzle(n, difficulty);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
 
     var cage_operators_values = {};
+    var at_least_one_mod = false;
     for (let id in cage_cells) {
         let cells = cage_cells[id];
         let op = ["+", "x"];
         if (cells.length == 2) {
+            op.push("+");
+            op.push("x");
+            op.push("-");
+            op.push("-");
             op.push("-");
             op.push("/");
+            op.push("/");
+            op.push("/");
+            if (mod == 1) {
+                op.push("%");
+                op.push("%");
+                op.push("%");
+            }
         }
         let operation = op[Math.floor(Math.random() * op.length)];
         let val = find_value(grid, operation, cells);
-        if (val == -1) {
-            operation = op[Math.floor(Math.random() * 3)];
+        while (val == -1) {
+            operation = op[Math.floor(Math.random() * op.length)];
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
+        if (operation == "%") {
+            at_least_one_mod = true;
+        }
     }
-    return [grid, cage_grid, cage_cells, cage_operators_values];
+    return [grid, cage_grid, cage_cells, cage_operators_values, at_least_one_mod];
 }
 
 function safe_row_col(n, cur_grid, coord, val) {
@@ -322,7 +348,7 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
             }
         }
     }
-    else {
+    else if (op[0] == "/") {
         if (vals.length == 2) {
             let big = Math.max(vals[0], vals[1]);
             let small = Math.min(vals[0], vals[1]);
@@ -339,6 +365,20 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
                 return false;
             }
         }
+    }
+    else if (op[0] == "%") {
+        if (vals.length == 2) {
+            let big = Math.max(vals[0], vals[1]);
+            let small = Math.min(vals[0], vals[1]);
+            console.log("------")
+            console.log("MOD");
+            console.log([big, small]);
+            if (big % small != op[1]) {
+                console.log("FAILED")
+                console.log(op)
+                return false;
+            }
+        } 
     }
     //console.log("proceeding...")
     return true;
