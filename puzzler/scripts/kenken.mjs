@@ -6,9 +6,9 @@ var diff = parseInt(queryString[1]);
 var mod = parseInt(queryString[2]);
 var gcd = parseInt(queryString[3]);
 var lcm = parseInt(queryString[4]);
+var zero_allowed = parseInt(queryString[5]);
 var need_special = mod + gcd + lcm;
-var special = [mod, gcd, lcm]
-var zero_allowed = false;
+var special = [mod, gcd, lcm, zero_allowed]
 
 var numSelected = null;
 var tileSelected = null;
@@ -72,7 +72,7 @@ function zero2D(k) {
     return arr;
   }
 
-function do_outputs(m, cc, cov, p) {
+function do_outputs(m, cc, cov, p, z) {
     //console.log("--------------------------");
     let initial_array = zero2D(m);
     //console.log(initial_array);
@@ -83,7 +83,7 @@ function do_outputs(m, cc, cov, p) {
     }
     //console.log(initial_array);
     //console.log("Starting: ");
-    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p);
+    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p, z);
 }
 
 function simulate(n, iter) {
@@ -106,13 +106,16 @@ function setGame() {
     var cage_cells = out[2];
     var cage_operators_values = out[3];
     var at_least_one_special = out[4];
-    var p = precompute(n, cage_cells, cage_operators_values);
+    var p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
     //console.log(out)
     //console.log(need_special)
     //console.log(need_special > 0 && at_least_one_special == false)
-    let s = do_outputs(n, cage_cells, cage_operators_values, p);
+    let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+    //console.log(p)
+    //console.log(s)
+
     let att = 1;
-    while (s != 1 || (need_special > 0 && at_least_one_special == false)) {
+    while ((s != 1 || (need_special > 0 && at_least_one_special == false))) {
         if (s != 1) {
             console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
         } else {
@@ -126,18 +129,20 @@ function setGame() {
         cage_cells = out[2];
         cage_operators_values = out[3];
         at_least_one_special = out[4];
-        p = precompute(n, cage_cells, cage_operators_values);
-        s = do_outputs(n, cage_cells, cage_operators_values, p);
+        p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
+        s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
     }
+    //console.log(s)
+    //console.log(p)
     solution = grid;
-    //console.log(grid);
+    console.log(grid);
     console.log(att);
     //console.log(grid);
     //console.log(cage_grid);
     //console.log(cage_cells);
     //console.log(cage_operators_values);
     //console.log(simulate(n, 100))
-    for (let i = 1; i <= n; i++) {
+    for (let i = 1-zero_allowed; i <= n-zero_allowed; i++) {
         //<div id="1" class="number">1</div>
         let number = document.createElement("div");
         number.id = i
@@ -300,11 +305,17 @@ function setGame() {
 
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
-            if ((zero_allowed == false && event.code != "Digit0") || zero_allowed) {
+            if (zero_allowed) {
+                if (parseInt(event.code[5]) <= n-1) {
+                    updateTile(tileHovered, parseInt(event.code[5]));
+                }
+            }
+            if (zero_allowed == false && event.code != "Digit0") {
                 if (parseInt(event.code[5]) <= n) {
                     updateTile(tileHovered, parseInt(event.code[5]));
                 }
             }
+            
         }
         if (event.code == "ShiftLeft" || event.code == "ShiftRight") {
             resetButtons();
@@ -748,14 +759,6 @@ function exitReset() {
     this.classList.remove("reset-hovered");
 }
 
-function hoverCheck() {
-    this.classList.add("check-hovered");
-}
-
-function exitCheck() {
-    this.classList.remove("check-hovered");
-}
-
 function hoverNumber() {
     if (numSelected != this) {
         this.classList.add("number-hovered");
@@ -979,7 +982,7 @@ function add_all() {
     if (tileSelected) {
         cleanSlate(tileSelected);
         notes.set(tileSelected.id, [])
-        for (let i = 1; i <= n; i++) {
+        for (let i = 1-zero_allowed; i <= n-zero_allowed; i++) {
             handleNote(tileSelected, i);
         }
     }

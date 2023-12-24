@@ -42,12 +42,19 @@ function valid(coord, n) {
     return coord[0] >= 0 && coord[0] < n && coord[1] >= 0 && coord[1] < n;
 }
 
-function create_puzzle(n, difficulty) {
+function create_puzzle(n, difficulty, zero_allowed) {
     var difficult = [[1,2,2,2,2,3,3,3,3,4],
               [1,2,2,2,2,2,3,3,3,3,3,4,4,5],
               [1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,6]]
     var grid = generate_grid(n)
     var cage_grid = Array(n);
+    if (zero_allowed == 1) {
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                grid[i][j] -= 1;
+            }
+        }
+    }
     for (let i = 0; i < n; i++) {
         cage_grid[i] = Array(n);
         for (let j = 0; j < n; j++) {
@@ -157,6 +164,9 @@ function find_value(grid, operator, cells) {
         let v1 = grid[c1[0]][c1[1]];
         let big = Math.max(v0, v1);
         let small = Math.min(v0, v1);
+        if (big * small == 0) {
+            return -1;
+        }
         if (big % small != 0) {
             return -1;
         }
@@ -179,8 +189,11 @@ function find_value(grid, operator, cells) {
         let v1 = grid[c1[0]][c1[1]];
         let big = Math.max(v0, v1);
         let small = Math.min(v0, v1);
+        if (big * small == 0) {
+            return -1;
+        }
         if (big % small == 0) {
-            if (Math.random() > 0.3) {
+            if (Math.random() > 0.2) {
                 return big % small;
             } else {
                 return -1;
@@ -193,10 +206,13 @@ function find_value(grid, operator, cells) {
         let ans = grid[cells[0][0]][cells[0][1]];
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
+            if (grid[cell[0]][cell[1]] == 0){
+                return -1;
+            }
             ans = gcd(ans, grid[cell[0]][cell[1]]);
         }
         if (ans == 1) {
-            if (Math.random() > 0.4) {
+            if (Math.random() > 0.2) {
                 return ans;
             }
             return -1;
@@ -208,6 +224,9 @@ function find_value(grid, operator, cells) {
         let ans = grid[cells[0][0]][cells[0][1]];
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
+            if (grid[cell[0]][cell[1]] == 0){
+                return -1;
+            }
             ans = lcm(ans, grid[cell[0]][cell[1]]);
         }
         return ans;
@@ -264,7 +283,7 @@ export function find_best_cell(cells) {
 }
 
 export function assign_operators(n, difficulty, special) {
-    var out = create_puzzle(n, difficulty);
+    var out = create_puzzle(n, difficulty, special[3]);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
@@ -300,6 +319,9 @@ export function assign_operators(n, difficulty, special) {
             op.push("x");
             op.push("lcm");
             op.push("lcm");
+        }
+        if (cells.includes(0)) {
+            op = ["+", "-", "x"]
         }
         let operation = op[Math.floor(Math.random() * op.length)];
         let val = find_value(grid, operation, cells);
@@ -343,7 +365,7 @@ function twoD_contains(twoD, oneD) {
 
 
 
-function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
+function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val, zero_allowed) {
     let cur_cage = 0;
     for (let i = 0; i < Object.keys(cage_cells).length; i++) {
         if (twoD_contains(cage_cells[i], coord)) {
@@ -365,111 +387,130 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
     //console.log(cur_grid)
     //console.log(coord, val)
     //console.log(vals)
-    if (op[0] == "+") {
-        let ans = vals.reduce((a,b) => a + b, 0);
-        if (ans > op[1]) {
-            //console.log("FAILED")
-            //console.log(op)
-            return false;
-        }
-        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
-            //console.log("FAILED")
-            //console.log(op)
-            return false;
-        }
-    }
-    else if (op[0] == "x") {
-        let ans = vals.reduce((a,b) => a*b, 1);
-        if (ans > op[1]) {
-            //console.log("FAILED")
-            //console.log(op)
-            return false;
-        }
-        if (op[1] % ans != 0) {
-            return false;
-        }
-        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
-            //console.log("FAILED")
-            //console.log(op)
-            return false;
-        }
-    } 
-    else if (op[0] == "-") {
-        if (vals.length == 2) {
-            let big = Math.max(vals[0], vals[1]);
-            let small = Math.min(vals[0], vals[1]);
-            //console.log("SUB");
-            //console.log([big, small]);
-            if (big - small != op[1]) {
+    if (zero_allowed == 0 || op[1] != 0) {
+        if (op[0] == "+") {
+            let ans = vals.reduce((a,b) => a + b, 0);
+            if (ans > op[1]) {
+                //console.log("FAILED")
+                //console.log(op)
+                return false;
+            }
+            if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
                 //console.log("FAILED")
                 //console.log(op)
                 return false;
             }
         }
-        else if (vals.length == 1) {
-            let a = vals[0] + op[1];
-            let b = vals[0] - op[1];
-            if (a > n && b < 1) {
+        else if (op[0] == "x") {
+            let ans = vals.reduce((a,b) => a*b, 1);
+            if (ans > op[1]) {
+                //console.log("FAILED")
+                //console.log(op)
                 return false;
             }
-        }
-    }
-    else if (op[0] == "/") {
-        if (vals.length == 2) {
-            let big = Math.max(vals[0], vals[1]);
-            let small = Math.min(vals[0], vals[1]);
-            //console.log("DIV");
-            //console.log([big, small]);
-            if (big % small != 0 || big / small != op[1]) {
+            if (op[1] % ans != 0) {
+                return false;
+            }
+            if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
                 //console.log("FAILED")
                 //console.log(op)
                 return false;
             }
         } 
-        else if (vals.length == 1) {
-            if (val % op[1] != 0 && val * op[1] > n) {
+        else if (op[0] == "-") {
+            if (vals.length == 2) {
+                let big = Math.max(vals[0], vals[1]);
+                let small = Math.min(vals[0], vals[1]);
+                //console.log("SUB");
+                //console.log([big, small]);
+                if (big - small != op[1]) {
+                    //console.log("FAILED")
+                    //console.log(op)
+                    return false;
+                }
+            }
+            else if (vals.length == 1) {
+                let a = vals[0] + op[1];
+                let b = vals[0] - op[1];
+                if (vals[0] != 0) {
+                    if (a > n && b < 1) {
+                        return false;
+                    }
+                }
+                
+            }
+        }
+        else if (op[0] == "/") {
+            if (vals.length == 2) {
+                let big = Math.max(vals[0], vals[1]);
+                let small = Math.min(vals[0], vals[1]);
+                //console.log("DIV");
+                //console.log([big, small]);
+                if (big % small != 0 || big / small != op[1]) {
+                    //console.log("FAILED")
+                    //console.log(op)
+                    return false;
+                }
+            } 
+            else if (vals.length == 1) {
+                if (val % op[1] != 0 && val * op[1] > n) {
+                    return false;
+                }
+            }
+        }
+        else if (op[0] == "%") {
+            if (vals.length == 2) {
+                let big = Math.max(vals[0], vals[1]);
+                let small = Math.min(vals[0], vals[1]);
+                //console.log("------")
+                //console.log("MOD");
+                //console.log([big, small]);
+                if (big % small != op[1]) {
+                    //console.log("FAILED")
+                    //console.log(op)
+                    return false;
+                }
+            } 
+        }
+        else if (op[0] == "gcd") {
+            let ans = vals[0];
+            for (let i = 0; i < vals.length; i++) {
+                ans = gcd(ans, vals[i]);
+            }
+            if (ans % op[1] != 0) {
+                return false;
+            }
+            if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+                return false;
+            }
+        }
+        else if (op[0] == "lcm") {
+            let ans = vals[0];
+            for (let i = 0; i < vals.length; i++) {
+                ans = lcm(ans, vals[i]);
+            }
+            if (op[1] % ans != 0) {
+                return false;
+            }
+            if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
                 return false;
             }
         }
     }
-    else if (op[0] == "%") {
-        if (vals.length == 2) {
-            let big = Math.max(vals[0], vals[1]);
-            let small = Math.min(vals[0], vals[1]);
-            //console.log("------")
-            //console.log("MOD");
-            //console.log([big, small]);
-            if (big % small != op[1]) {
-                //console.log("FAILED")
-                //console.log(op)
+    else {
+        if (vals.includes(0)) {
+            if (op[0] == "/" || op[0] == "%" || op[0] == "gcd" || op[0] == "lcm") {
                 return false;
             }
-        } 
-    }
-    else if (op[0] == "gcd") {
-        let ans = vals[0];
-        for (let i = 0; i < vals.length; i++) {
-            ans =gcd(ans, vals[i]);
         }
-        if (ans % op[1] != 0) {
-            return false;
-        }
-        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
-            return false;
+        if (op[0] == "x") {
+            let ans = vals.reduce((a,b) => a*b, 1);
+            if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+                return false;
+            }
         }
     }
-    else if (op[0] == "lcm") {
-        let ans = vals[0];
-        for (let i = 0; i < vals.length; i++) {
-            ans =lcm(ans, vals[i]);
-        }
-        if (op[1] % ans != 0) {
-            return false;
-        }
-        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
-            return false;
-        }
-    }
+    
     //console.log("proceeding...")
     return true;
 }
@@ -487,21 +528,21 @@ function cur_op(n, cage_cells, cage_operators_values, coord) {
     return [op, cage_cells[cur_cage].length];
 }
 
-export function precompute(n, cage_cells, cage_operators_values) {
+export function precompute(n, cage_cells, cage_operators_values, zero_allowed) {
     let ans = new Map();
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             let out = cur_op(n, cage_cells, cage_operators_values, [r,c])
             let cop = out[0];
             let clen = out[1]
-            let possible_vals = p_vals(n, cop, clen);
+            let possible_vals = p_vals(n, cop, clen, zero_allowed);
             ans.set(r.toString() + "-" + c.toString(), possible_vals);
         }
     }
     return ans;
 }
 
-export function solutions(n, cur_grid, cage_cells, cage_operators_values, precomp) {
+export function solutions(n, cur_grid, cage_cells, cage_operators_values, precomp, zero_allowed) {
     let r = 0;
     let c = 0;
     let incomplete = false;
@@ -524,48 +565,49 @@ export function solutions(n, cur_grid, cage_cells, cage_operators_values, precom
     let ans = 0;
     //console.log(precomp)
     let possible_vals = precomp.get(r.toString() + "-" + c.toString());
+    //console.log(precomp)
     for (let j = 0; j <= possible_vals.length; j++) {
         let i = possible_vals[j];
-        if (safe_row_col(n, cur_grid, [r,c], i) && safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i)) {
+        if (safe_row_col(n, cur_grid, [r,c], i) && safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i, zero_allowed) && i != null) {
             let next_grid = JSON.parse(JSON.stringify(cur_grid));
             next_grid[r][c] = i;
             //console.log(next_grid);
-            ans += solutions(n, next_grid, cage_cells, cage_operators_values, precomp);
-            if (ans > 1) {
-                return ans; // no longer accurate, cutting search short to save time
-            }
+            ans += solutions(n, next_grid, cage_cells, cage_operators_values, precomp, zero_allowed);
+            //if (ans > 1) {
+            //    return ans; // no longer accurate, cutting search short to save time
+            //}
         }
     }
     return ans;
 }
 
-function p_vals(n, oper, len) {
+function p_vals(n, oper, len, zero_allowed) {
     let func = oper[0];
     let val = oper[1];
     let ans = new Array();
-    for (let i = 1; i <= n; i++) {
+    for (let i = 1-zero_allowed; i <= n-zero_allowed; i++) {
         if (func == "x") {
-            if (val % i == 0) {
+            if ((val == 0 && i == 0) || val % i == 0) {
                 ans.push(i);
             }
         }
         else if (func == "/") {
-            if (i * val <= n || i % val == 0) {
+            if (i != 0 && (i * val <= n || i % val == 0)) {
                 ans.push(i)
             }
         }
         else if (func == "gcd") {
-            if (i % val == 0) {
+            if (i != 0 && i % val == 0) {
                 ans.push(i)
             }
         }
         else if (func == "lcm") {
-            if (val % i == 0) {
+            if (i != 0 && val % i == 0) {
                 ans.push(i)
             }
         }
         else if (func == "%") {
-            if (i > val) {
+            if (i != 0 && i > val) {
                 ans.push(i)
             }
         }
