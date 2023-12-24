@@ -17,6 +17,7 @@ var min = 0;
 var tileHovered = null;
 var lastInsertion = null;
 var affectedTiles = null;
+var given = new Array();
 
 var notes = new Map();
 
@@ -161,6 +162,7 @@ function setGame() {
                 tile.classList.add("thicc-right");
             }
             tiles.push(tile);
+            given.push(tile);
         }
         else {
             let best = find_best_cell(cells);
@@ -285,6 +287,9 @@ function setGame() {
         }
         if (event.code == "KeyU") {
             undo_insertion();
+        }
+        if (event.code == "KeyP") {
+            master_plus();
         }
     });
 
@@ -764,7 +769,7 @@ function displayWin() {
     let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Fast as lightning!", "Speedy Gonzalez!", "Speedster!"]
     let fast_messages = ["Quick!", "Super star!", "Run Forrest run!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
-    let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there", "Impressive!"];
+    let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there"];
 
     let score = 60 * min + sec;
     let arr = null;
@@ -909,6 +914,20 @@ function add_all() {
         notes.set(tileSelected.id, [])
         for (let i = 1; i <= n; i++) {
             handleNote(tileSelected, i);
+        }
+    }
+}
+
+function master_plus() {
+    if (confirm("Are you sure you want to fill in every tile?")) {
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let t = document.getElementById(i.toString() + "-" + j.toString());
+                if ((t.innerHTML.length > 0 && t.innerHTML[0] != "<") == false) {
+                    tileSelected = t;
+                    add_all();
+                }
+            }
         }
     }
 }
