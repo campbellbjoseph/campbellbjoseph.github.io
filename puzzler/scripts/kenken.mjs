@@ -18,6 +18,7 @@ var tileHovered = null;
 var lastInsertion = null;
 var affectedTiles = null;
 var given = new Array();
+var used_notes = false;
 
 var notes = new Map();
 
@@ -419,6 +420,7 @@ function add_pencil() {
 }
 
 function addNote(tile, note) {
+    used_notes = true;
     if (notes.has(tile.id)) {
         let arr = notes.get(tile.id);
         arr.push(note);
@@ -431,10 +433,10 @@ function addNote(tile, note) {
 }
 
 function removeNote(tile, note) {
-    console.log("Deleting")
-    console.log(notes.get(tile.id))
+    //console.log("Deleting")
+    //console.log(notes.get(tile.id))
     let arr = notes.get(tile.id);
-    console.log(arr.indexOf(parseInt(note)))
+    //console.log(arr.indexOf(parseInt(note)))
     arr.splice(arr.indexOf(parseInt(note)), 1)
     console.log(arr)
     notes.set(tile.id, arr);
@@ -805,6 +807,9 @@ function displayWin() {
     }
     if (speed == -1) {
         document.getElementById("title").innerHTML += "<h1>&#x1F422</h1>"
+    }
+    if (used_notes == false) {
+        document.getElementById("title").innerHTML += "<h2>&#x2B50 Mental Master &#x2B50</h2>"
     }
     let new_game = document.createElement("form");
     new_game.action = "/puzzler/index.html";
