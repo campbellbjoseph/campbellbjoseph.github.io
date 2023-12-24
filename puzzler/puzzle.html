@@ -7,6 +7,15 @@
         <link rel="stylesheet" href="kenken.css">
         <script type="module" src="scripts/kenken.mjs"></script>
     </head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-78B3CE9ZLV"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-78B3CE9ZLV');
+    </script>
 
     <body>
         <div id = title>
@@ -36,6 +45,7 @@
                 <b>&#x1F525 &#x1F525</b>: Super fast <br>
                 <b>&#x1F525</b>: Fast <br>
                 <b>&#x1F422</b>: Slow <br>
+                <b>&#x1F422 &#x1F422</b>: Super slow<br>
                 <button onclick="display()" class = "button" id = "inst">Instructions</button>
             </div>
             

@@ -836,6 +836,7 @@ function displayWin() {
     let fast_messages = ["Quick!", "Super star!", "Run Forrest run!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
     let slow_messages = ["Slow and steady wins the race!", "Cool, calm, and collected.", "The glory is in the struggle!", "You showed heart!", "Never give up!", "Way to hang in there"];
+    let super_slow_messages = ["Success is 1% inspiration and 99% perspiration!", "You deserve a break after that!"]
 
     let score = 60 * min + sec;
     let arr = null;
@@ -844,10 +845,12 @@ function displayWin() {
     let sf_cutoff = [0,0,0,15,30,75,120,240,480,600,900,1200,1800]
     let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
     let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
+    let s_cutoff = [0,0,0,75,150,240,390,600,1020,1500,2200,2800,4200]
 
-    let sf = sf_cutoff[n]*(1+0.2*diff+0.2*need_special);
-    let f = f_cutoff[n]*(1+0.2*diff+0.2*need_special);
-    let r = r_cutoff[n]*(1+0.2*diff+0.2*need_special);
+    let sf = sf_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
+    let f = f_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
+    let r = r_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
+    let s = s_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
     if (score <= sf) {
         arr = super_fast_messages;
         speed = 2;
@@ -855,10 +858,14 @@ function displayWin() {
         arr = fast_messages;
         speed = 1;
     } else if (score <= r) {
+        score = 0;
         arr = messages;
-    } else {
+    } else if (score <= s) {
         speed = -1;
         arr = slow_messages;
+    } else {
+        speed = -2;
+        arr = super_slow_messages;
     }
 
     won = true;
@@ -872,6 +879,9 @@ function displayWin() {
     }
     if (speed == -1) {
         document.getElementById("title").innerHTML += "<h1>&#x1F422</h1>"
+    }
+    if (speed == -2) {
+        document.getElementById("title").innerHTML += "<h1>&#x1F422 &#x1F422</h1>"
     }
     if (used_notes == false) {
         document.getElementById("title").innerHTML += "<h2>&#x2B50 Mental Master &#x2B50</h2>"
