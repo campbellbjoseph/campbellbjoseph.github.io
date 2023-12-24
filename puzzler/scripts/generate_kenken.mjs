@@ -244,7 +244,7 @@ export function assign_operators(n, difficulty, mod) {
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
-        if (operation == "%") {
+        if (operation == "%" && mod == 1) {
             at_least_one_mod = true;
         }
     }

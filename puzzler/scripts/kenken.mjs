@@ -104,8 +104,8 @@ function setGame() {
     var at_least_one_mod = out[4];
     let s = do_outputs(n, cage_cells, cage_operators_values);
     let att = 1;
-    console.log(grid);
-    while (s != 1 && at_least_one_mod == false) {
+    console.log(out);
+    while (s != 1 || at_least_one_mod == false) {
         att++;
         out = assign_operators(n, diff, mod);
         grid = out[0];
