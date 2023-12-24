@@ -616,7 +616,7 @@ function updateTile(tile, number) {
             if (document.getElementById("undo") == null) {
                 add_undo();
             }
-            console.log(lastInsertion);
+            //console.log(lastInsertion);
         }
     }
 }

@@ -179,6 +179,13 @@ function find_value(grid, operator, cells) {
         let v1 = grid[c1[0]][c1[1]];
         let big = Math.max(v0, v1);
         let small = Math.min(v0, v1);
+        if (big % small == 0) {
+            if (Math.random() > 0.3) {
+                return big % small;
+            } else {
+                return -1;
+            }
+        }
         return big % small;
     }
 
@@ -525,7 +532,7 @@ export function solutions(n, cur_grid, cage_cells, cage_operators_values, precom
             //console.log(next_grid);
             ans += solutions(n, next_grid, cage_cells, cage_operators_values, precomp);
             if (ans > 1) {
-                return ans; // no longer accurate, cutting search short
+                return ans; // no longer accurate, cutting search short to save time
             }
         }
     }
@@ -546,7 +553,23 @@ function p_vals(n, oper, len) {
             if (i * val <= n || i % val == 0) {
                 ans.push(i)
             }
-        } else {
+        }
+        else if (func == "gcd") {
+            if (i % val == 0) {
+                ans.push(i)
+            }
+        }
+        else if (func == "lcm") {
+            if (val % i == 0) {
+                ans.push(i)
+            }
+        }
+        else if (func == "%") {
+            if (i > val) {
+                ans.push(i)
+            }
+        }
+        else {
             ans.push(i)
         }
     }
