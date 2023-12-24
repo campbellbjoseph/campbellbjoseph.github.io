@@ -4,6 +4,10 @@ var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
 var diff = parseInt(queryString[1]);
 var mod = parseInt(queryString[2]);
+var gcd = parseInt(queryString[3]);
+var lcm = parseInt(queryString[4]);
+var need_special = mod + gcd + lcm;
+var special = [mod, gcd, lcm]
 var zero_allowed = false;
 
 var numSelected = null;
@@ -96,26 +100,26 @@ function simulate(n, iter) {
 }
 
 function setGame() {
-    var out = assign_operators(n, diff, mod);
+    var out = assign_operators(n, diff, special);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
     var cage_operators_values = out[3];
-    var at_least_one_mod = out[4];
+    var at_least_one_special = out[4];
     let s = do_outputs(n, cage_cells, cage_operators_values);
     let att = 1;
-    console.log(out);
-    while (s != 1 || at_least_one_mod == false) {
+    while (s != 1 || (need_special > 0 && at_least_one_special == false)) {
         att++;
-        out = assign_operators(n, diff, mod);
+        out = assign_operators(n, diff, special);
         grid = out[0];
         cage_grid = out[1];
         cage_cells = out[2];
         cage_operators_values = out[3];
-        at_least_one_mod = out[4];
+        at_least_one_special = out[4];
         s = do_outputs(n, cage_cells, cage_operators_values);
     }
     solution = grid;
+    console.log(grid);
     console.log(att);
     //console.log(grid);
     //console.log(cage_grid);
@@ -210,7 +214,11 @@ function setGame() {
                 if (cells[i][0] == best[0] && cells[i][1] == best[1]) {
                     let inst = document.createElement("div");
                     inst.id = tile.id + ":" + data[1].toString() + data[0];
-                    inst.innerText = data[1].toString() + data[0];
+                    if (data[0] == "gcd" || data[0] == "lcm") {
+                        inst.innerText = data[0] + "(" + data[1].toString() + ")";
+                    } else {
+                        inst.innerText = data[1].toString() + data[0];
+                    }
                     inst.classList.add("instruction");
                     tile.append(inst);
                 }

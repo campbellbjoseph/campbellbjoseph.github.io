@@ -181,7 +181,46 @@ function find_value(grid, operator, cells) {
         let small = Math.min(v0, v1);
         return big % small;
     }
+
+    else if (operator == "gcd") {
+        let ans = grid[cells[0][0]][cells[0][1]];
+        for (let i = 0; i < cells.length; i++) {
+            let cell = cells[i];
+            ans =gcd(ans, grid[cell[0]][cell[1]]);
+        }
+        return ans;
+    }
+
+    else if (operator == "lcm") {
+        let ans = grid[cells[0][0]][cells[0][1]];
+        for (let i = 0; i < cells.length; i++) {
+            let cell = cells[i];
+            ans =lcm(ans, grid[cell[0]][cell[1]]);
+        }
+        return ans;
+    }
     return -1;
+}
+
+function gcd(x, y) {
+    if ((typeof x !== 'number') || (typeof y !== 'number')) 
+      return false;
+    x = Math.abs(x);
+    y = Math.abs(y);
+    while(y) {
+      var t = y;
+      y = x % y;
+      x = t;
+    }
+    return x;
+  }
+
+function lcm(x, y) {
+    if ((typeof x !== 'number') || (typeof y !== 'number')) 
+      return false;
+    x = Math.abs(x);
+    y = Math.abs(y);
+    return (x * y)/(gcd(x,y));
 }
 
 function is_top_left_cell(coord, cells) {
@@ -211,14 +250,14 @@ export function find_best_cell(cells) {
     return best;
 }
 
-export function assign_operators(n, difficulty, mod) {
+export function assign_operators(n, difficulty, special) {
     var out = create_puzzle(n, difficulty);
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
 
     var cage_operators_values = {};
-    var at_least_one_mod = false;
+    var at_least_one_special = false;
     for (let id in cage_cells) {
         let cells = cage_cells[id];
         let op = ["+", "x"];
@@ -231,11 +270,25 @@ export function assign_operators(n, difficulty, mod) {
             op.push("/");
             op.push("/");
             op.push("/");
-            if (mod == 1) {
+            if (special[0] == 1) {
                 op.push("%");
                 op.push("%");
                 op.push("%");
             }
+        }
+        if (special[1] == 1) {
+            op.push("+");
+            op.push("x");
+            op.push("gcd");
+            op.push("gcd");
+            op.push("gcd");
+        }
+        if (special[2] == 1) {
+            op.push("+");
+            op.push("x");
+            op.push("lcm");
+            op.push("lcm");
+            op.push("lcm");
         }
         let operation = op[Math.floor(Math.random() * op.length)];
         let val = find_value(grid, operation, cells);
@@ -244,11 +297,11 @@ export function assign_operators(n, difficulty, mod) {
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
-        if (operation == "%" && mod == 1) {
-            at_least_one_mod = true;
+        if (operation == "%" || operation == "gcd" || operation == "lcm") {
+            at_least_one_special = true;
         }
     }
-    return [grid, cage_grid, cage_cells, cage_operators_values, at_least_one_mod];
+    return [grid, cage_grid, cage_cells, cage_operators_values, at_least_one_special];
 }
 
 function safe_row_col(n, cur_grid, coord, val) {
@@ -370,15 +423,39 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
         if (vals.length == 2) {
             let big = Math.max(vals[0], vals[1]);
             let small = Math.min(vals[0], vals[1]);
-            console.log("------")
-            console.log("MOD");
-            console.log([big, small]);
+            //console.log("------")
+            //console.log("MOD");
+            //console.log([big, small]);
             if (big % small != op[1]) {
-                console.log("FAILED")
-                console.log(op)
+                //console.log("FAILED")
+                //console.log(op)
                 return false;
             }
         } 
+    }
+    else if (op[0] == "gcd") {
+        let ans = vals[0];
+        for (let i = 0; i < vals.length; i++) {
+            ans =gcd(ans, vals[i]);
+        }
+        if (ans % op[1] != 0) {
+            return false;
+        }
+        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+            return false;
+        }
+    }
+    else if (op[0] == "lcm") {
+        let ans = vals[0];
+        for (let i = 0; i < vals.length; i++) {
+            ans =lcm(ans, vals[i]);
+        }
+        if (op[1] % ans != 0) {
+            return false;
+        }
+        if (vals.length == cage_cells[cur_cage].length && ans != op[1]) {
+            return false;
+        }
     }
     //console.log("proceeding...")
     return true;
