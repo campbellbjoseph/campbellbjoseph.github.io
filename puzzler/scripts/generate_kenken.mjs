@@ -186,7 +186,13 @@ function find_value(grid, operator, cells) {
         let ans = grid[cells[0][0]][cells[0][1]];
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
-            ans =gcd(ans, grid[cell[0]][cell[1]]);
+            ans = gcd(ans, grid[cell[0]][cell[1]]);
+        }
+        if (ans == 1) {
+            if (Math.random() > 0.4) {
+                return ans;
+            }
+            return -1;
         }
         return ans;
     }
@@ -195,7 +201,7 @@ function find_value(grid, operator, cells) {
         let ans = grid[cells[0][0]][cells[0][1]];
         for (let i = 0; i < cells.length; i++) {
             let cell = cells[i];
-            ans =lcm(ans, grid[cell[0]][cell[1]]);
+            ans = lcm(ans, grid[cell[0]][cell[1]]);
         }
         return ans;
     }
@@ -275,18 +281,16 @@ export function assign_operators(n, difficulty, special) {
                 op.push("%");
                 op.push("%");
             }
-        }
-        if (special[1] == 1) {
-            op.push("+");
-            op.push("x");
-            op.push("gcd");
-            op.push("gcd");
-            op.push("gcd");
+            if (special[1] == 1) {
+                op.push("+");
+                op.push("x");
+                op.push("gcd");
+                op.push("gcd");
+            }
         }
         if (special[2] == 1) {
             op.push("+");
             op.push("x");
-            op.push("lcm");
             op.push("lcm");
             op.push("lcm");
         }
@@ -297,7 +301,7 @@ export function assign_operators(n, difficulty, special) {
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
-        if (operation == "%" || operation == "gcd" || operation == "lcm") {
+        if ((operation == "%" || operation == "gcd" || operation == "lcm") && cells.length > 1) {
             at_least_one_special = true;
         }
     }
@@ -329,6 +333,8 @@ function twoD_contains(twoD, oneD) {
     }
     return false;
 }
+
+
 
 function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
     let cur_cage = 0;
@@ -461,7 +467,34 @@ function safe_cage(n, cur_grid, cage_cells, cage_operators_values, coord, val) {
     return true;
 }
 
-export function solutions(n, cur_grid, cage_cells, cage_operators_values) {
+function cur_op(n, cage_cells, cage_operators_values, coord) {
+    let cur_cage = 0;
+    for (let i = 0; i < Object.keys(cage_cells).length; i++) {
+        if (twoD_contains(cage_cells[i], coord)) {
+            cur_cage = i;
+            break;
+        }
+    }
+
+    let op = cage_operators_values[cur_cage];
+    return [op, cage_cells[cur_cage].length];
+}
+
+export function precompute(n, cage_cells, cage_operators_values) {
+    let ans = new Map();
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            let out = cur_op(n, cage_cells, cage_operators_values, [r,c])
+            let cop = out[0];
+            let clen = out[1]
+            let possible_vals = p_vals(n, cop, clen);
+            ans.set(r.toString() + "-" + c.toString(), possible_vals);
+        }
+    }
+    return ans;
+}
+
+export function solutions(n, cur_grid, cage_cells, cage_operators_values, precomp) {
     let r = 0;
     let c = 0;
     let incomplete = false;
@@ -478,20 +511,43 @@ export function solutions(n, cur_grid, cage_cells, cage_operators_values) {
     }
 
     if (incomplete == false) {
-        //console.log("--------------------");
-        //console.log("Solution Found!");
-        //console.log(cur_grid);
-        //console.log("--------------------");
         return 1;
     }
 
     let ans = 0;
-    for (let i = 1; i <= n; i++) {
-        if (safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i) && safe_row_col(n, cur_grid, [r,c], i)) {
+    //console.log(precomp)
+    let possible_vals = precomp.get(r.toString() + "-" + c.toString());
+    for (let j = 0; j <= possible_vals.length; j++) {
+        let i = possible_vals[j];
+        if (safe_row_col(n, cur_grid, [r,c], i) && safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i)) {
             let next_grid = JSON.parse(JSON.stringify(cur_grid));
             next_grid[r][c] = i;
             //console.log(next_grid);
-            ans += solutions(n, next_grid, cage_cells, cage_operators_values);
+            ans += solutions(n, next_grid, cage_cells, cage_operators_values, precomp);
+            if (ans > 1) {
+                return ans; // no longer accurate, cutting search short
+            }
+        }
+    }
+    return ans;
+}
+
+function p_vals(n, oper, len) {
+    let func = oper[0];
+    let val = oper[1];
+    let ans = new Array();
+    for (let i = 1; i <= n; i++) {
+        if (func == "x") {
+            if (val % i == 0) {
+                ans.push(i);
+            }
+        }
+        else if (func == "/") {
+            if (i * val <= n || i % val == 0) {
+                ans.push(i)
+            }
+        } else {
+            ans.push(i)
         }
     }
     return ans;

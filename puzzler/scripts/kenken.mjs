@@ -1,4 +1,4 @@
-import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions } from "./generate_kenken.mjs";
+import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions, precompute } from "./generate_kenken.mjs";
 
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
@@ -72,7 +72,7 @@ function zero2D(k) {
     return arr;
   }
 
-function do_outputs(m, cc, cov) {
+function do_outputs(m, cc, cov, p) {
     //console.log("--------------------------");
     let initial_array = zero2D(m);
     //console.log(initial_array);
@@ -83,7 +83,7 @@ function do_outputs(m, cc, cov) {
     }
     //console.log(initial_array);
     //console.log("Starting: ");
-    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov);
+    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p);
 }
 
 function simulate(n, iter) {
@@ -106,9 +106,19 @@ function setGame() {
     var cage_cells = out[2];
     var cage_operators_values = out[3];
     var at_least_one_special = out[4];
-    let s = do_outputs(n, cage_cells, cage_operators_values);
+    var p = precompute(n, cage_cells, cage_operators_values);
+    //console.log(out)
+    //console.log(need_special)
+    //console.log(need_special > 0 && at_least_one_special == false)
+    let s = do_outputs(n, cage_cells, cage_operators_values, p);
     let att = 1;
     while (s != 1 || (need_special > 0 && at_least_one_special == false)) {
+        if (s != 1) {
+            console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
+        } else {
+            console.log("Attempt " + att.toString() + ": Failed due to lack of special")
+        }
+        
         att++;
         out = assign_operators(n, diff, special);
         grid = out[0];
@@ -116,10 +126,11 @@ function setGame() {
         cage_cells = out[2];
         cage_operators_values = out[3];
         at_least_one_special = out[4];
-        s = do_outputs(n, cage_cells, cage_operators_values);
+        p = precompute(n, cage_cells, cage_operators_values);
+        s = do_outputs(n, cage_cells, cage_operators_values, p);
     }
     solution = grid;
-    console.log(grid);
+    //console.log(grid);
     console.log(att);
     //console.log(grid);
     //console.log(cage_grid);
@@ -793,9 +804,9 @@ function displayWin() {
     let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
     let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
 
-    let sf = sf_cutoff[n]*(1+0.2*diff);
-    let f = f_cutoff[n]*(1+0.2*diff);
-    let r = r_cutoff[n]*(1+0.2*diff);
+    let sf = sf_cutoff[n]*(1+0.2*diff+0.2*need_special);
+    let f = f_cutoff[n]*(1+0.2*diff+0.2*need_special);
+    let r = r_cutoff[n]*(1+0.2*diff+0.2*need_special);
     if (score <= sf) {
         arr = super_fast_messages;
         speed = 2;
