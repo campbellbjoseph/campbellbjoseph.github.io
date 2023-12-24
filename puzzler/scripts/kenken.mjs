@@ -859,6 +859,7 @@ function displayWin() {
     }
 
     won = true;
+    document.getElementById("pause").remove();
     document.getElementById("title").innerHTML += "<h1>" + arr[Math.floor(Math.random() * (arr.length) - 0.0001)] +"</h1>";
     if (speed == 1) {
         document.getElementById("title").innerHTML += "<h1>&#x1F525</h1>"
