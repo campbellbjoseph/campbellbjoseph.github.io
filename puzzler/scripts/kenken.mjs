@@ -779,9 +779,9 @@ function displayWin() {
     let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
     let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
 
-    let sf = sf_cutoff[n]*(1+0.1*diff);
-    let f = f_cutoff[n]*(1+0.1*diff);
-    let r = r_cutoff[n]*(1+0.1*diff);
+    let sf = sf_cutoff[n]*(1+0.2*diff);
+    let f = f_cutoff[n]*(1+0.2*diff);
+    let r = r_cutoff[n]*(1+0.2*diff);
     if (score <= sf) {
         arr = super_fast_messages;
         speed = 2;
@@ -923,7 +923,7 @@ function master_plus() {
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < n; j++) {
                 let t = document.getElementById(i.toString() + "-" + j.toString());
-                if ((t.innerHTML.length > 0 && t.innerHTML[0] != "<") == false) {
+                if ((t.innerHTML.length > 0 && t.innerHTML[0] != "<") == false && (notes.has(t.id) == false || notes.get(t.id).length == 0)) {
                     tileSelected = t;
                     add_all();
                 }
