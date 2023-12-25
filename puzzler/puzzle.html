@@ -64,7 +64,8 @@
                 d.innerHTML += "<b>Modulo (%):</b> The <u>remainder</u> when the larger number is divided by the smaller number is the desired amount (e.g. 1% => [4,3] or [3,2] in a 4x4)<br>"
                 d.innerHTML += "<b>Greatest Common Divisor (gcd):</b> The largest number that divides all numbers in the cell (e.g. gcd2 => [2,4,6], etc. in a 6x6 puzzle)<br>"
                 d.innerHTML += "<b>Least Common Multiple (lcm):</b> The smallest number that is divisible by all numbers in the cell (e.g. lcm6 => [1,6], [2,6], [2,3], etc. in a 6x6)<br>"
-                d.innerHTML += "<b>Zero:</b> Puzzle will include numbers from 0 -> N-1. Modulo, GCD, LCM, and Division clues will not include zero (e.g. 6+ [6,0], [1,5], etc. in a 7x7)"
+                d.innerHTML += "<b>Zero:</b> Puzzle will include numbers from 0 -> N-1. Modulo, GCD, LCM, and Division clues will not include zero (e.g. 6+ [6,0], [1,5], etc. in a 7x7)<br>"
+                d.innerHTML += "<b>Hidden clues:</b> Solve for X, with or without solving the entire puzzle!"
                 document.getElementById("inst").onclick = "rem()";
                 document.getElementById("inst").innerText = "Clear";
 }

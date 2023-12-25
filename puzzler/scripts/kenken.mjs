@@ -909,6 +909,9 @@ function displayWin() {
 
     won = true;
     document.getElementById("pause").remove();
+    if (hidden_clues == 1) {
+        arr.push("X marks the spot!!")
+    }
     document.getElementById("title").innerHTML += "<h1>" + arr[Math.floor(Math.random() * (arr.length) - 0.0001)] +"</h1>";
     if (speed == 1) {
         document.getElementById("title").innerHTML += "<h1>&#x1F525</h1>"
@@ -930,7 +933,7 @@ function displayWin() {
     new_game.id = "new_game";
     new_game.classList.add()
     let b = document.createElement("input");
-    b.type = "submit";
+    b.type = "submit";  
     b.value = "New game";
     b.classList.add("new_game");
     lock_buttons();
