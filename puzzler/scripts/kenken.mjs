@@ -363,6 +363,9 @@ function setGame() {
         if (event.code == "KeyP") {
             master_plus();
         }
+        if (event.code == "KeyM") {
+            master_minus();
+        }
     });
 
     if (n <= 10) {
@@ -1048,6 +1051,20 @@ function master_plus() {
                 if ((t.innerHTML.length > 0 && t.innerHTML[0] != "<") == false && (notes.has(t.id) == false || notes.get(t.id).length == 0)) {
                     tileSelected = t;
                     add_all();
+                }
+            }
+        }
+    }
+}
+
+function master_minus() {
+    if (confirm("Are you sure you want to remove all notes?")) {
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let t = document.getElementById(i.toString() + "-" + j.toString());
+                if ((t.innerHTML.length > 0 && t.innerHTML[0] != "<") == false && (notes.has(t.id) == true && notes.get(t.id).length != 0)) {
+                    tileSelected = t;
+                    subtract_all();
                 }
             }
         }
