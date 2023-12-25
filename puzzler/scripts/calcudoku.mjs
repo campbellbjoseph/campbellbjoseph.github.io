@@ -11,6 +11,7 @@ var hidden_clues = parseInt(queryString[6]);
 var need_special = mod + gcd + lcm;
 var special = [mod, gcd, lcm, zero_allowed, hidden_clues]
 var hidden_ans = null;
+var hidden_id = null;
 
 var numSelected = null;
 var tileSelected = null;
@@ -31,6 +32,9 @@ var paused = false;
 var notes = new Map();
 
 window.onload = function() {
+    //if (hidden_clues) {
+    //    simulate(n, 100);
+    //}
     setGame();
     
 }
@@ -88,16 +92,66 @@ function do_outputs(m, cc, cov, p, z) {
     return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p, z);
 }
 
+function evaluate_hidden(n, cage_cells, cage_operators_values, p, z) {
+    let hidden_cell = cage_cells[hidden_id][0];
+    let initial_array = zero2D(n);
+    for (let id in cage_cells) {
+        if (cage_cells[id].length == 1 && id != hidden_id) {
+            initial_array[cage_cells[id][0][0]][cage_cells[id][0][1]] = cage_operators_values[id][1];
+        }
+    }
+    //console.log("Hidden cell: " + hidden_cell.toString() + ". Actual: " + hidden_ans.toString())
+    let ans = 0;
+    let arr = new Array();
+    for (let i = 1-z; i <= n-z; i++) {
+        initial_array[hidden_cell[0]][hidden_cell[1]] = i;
+        //console.log("Cell = " + i.toString())
+        let s = solutions(n, JSON.parse(JSON.stringify(initial_array)), cage_cells, cage_operators_values, p, z);
+        ans += s;
+        if (s != 0) {
+            arr.push(s);
+        }
+    }
+    if (ans == 1) {
+        return [true, arr];
+    } 
+    return [false, arr];
+}
+
 function simulate(n, iter) {
-    let arr = [0,0,0,0,0,0,0,0,0,0,0]
+    let arr = [0,0,0,0,0,0,0,0];
     for (let i = 0; i < iter; i++) {
-        var out = assign_operators(n, diff);
+        var out = assign_operators(n, diff, special);
         var grid = out[0];
         var cage_grid = out[1];
         var cage_cells = out[2];
         var cage_operators_values = out[3];
-        arr[do_outputs(n, cage_cells, cage_operators_values)] += 1;
+        var at_least_one_special = out[4];
+        var p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
+        let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        while ((s != 1 || (need_special > 0 && at_least_one_special == false))) {
+            out = assign_operators(n, diff, special);
+            grid = out[0];
+            cage_grid = out[1];
+            cage_cells = out[2];
+            cage_operators_values = out[3];
+            at_least_one_special = out[4];
+            p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
+            s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        }
+        for (let id in cage_cells) {
+            let cells = cage_cells[id];
+            let data = cage_operators_values[id];
+            if (cells.length == 1 && hidden_clues == 1 && data[0] == "HIDE") {
+                hidden_ans = data[1];
+                hidden_id = id;
+            }
+        }
+        let z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed);
+        arr[z[1].length] += 1;
     }
+    hidden_ans = null;
+    hidden_id = null;
     console.log(arr);
 }
 
@@ -115,13 +169,27 @@ function setGame() {
     let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
     //console.log(p)
     //console.log(s)
+    let z = null;
+    if (hidden_clues == 1) {
+        for (let id in cage_cells) {
+            let cells = cage_cells[id];
+            let data = cage_operators_values[id];
+            if (cells.length == 1 && hidden_clues == 1 && data[0] == "HIDE") {
+                hidden_ans = data[1];
+                hidden_id = id;
+            }
+        }
+        z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed)[0];
 
+    }
     let att = 1;
-    while ((s != 1 || (need_special > 0 && at_least_one_special == false))) {
+    while ((s != 1 || (need_special > 0 && at_least_one_special == false)) || (hidden_clues == 1 && z == false)) {
         if (s != 1) {
             console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
-        } else {
+        } else if ((need_special > 0 && at_least_one_special == false)) {
             console.log("Attempt " + att.toString() + ": Failed due to lack of special")
+        } else {
+            console.log("Attempt " + att.toString() + ": Failed due multiple X's")
         }
         
         att++;
@@ -133,6 +201,17 @@ function setGame() {
         at_least_one_special = out[4];
         p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
         s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        if (hidden_clues == 1) {
+            for (let id in cage_cells) {
+                let cells = cage_cells[id];
+                let data = cage_operators_values[id];
+                if (cells.length == 1 && hidden_clues == 1 && data[0] == "HIDE") {
+                    hidden_ans = data[1];
+                    hidden_id = id;
+                }
+            }
+            z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed)[0];
+        }
     }
     //console.log(s)
     //console.log(p)
@@ -180,6 +259,7 @@ function setGame() {
             if (hidden_clues == 1 && data[0] == "HIDE") {
                 tile.innerText = "X";
                 hidden_ans = data[1];
+                hidden_id = id;
             }
             tile.classList.add("tile");
             tile.append(inst);
@@ -264,6 +344,10 @@ function setGame() {
                 }
             }
         }
+    }
+
+    if (hidden_clues == 1) {
+        evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed);
     }
     let submit = document.createElement("div");
     submit.id = "submit";
