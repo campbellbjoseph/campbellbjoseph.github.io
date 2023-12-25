@@ -285,19 +285,31 @@ export function find_best_cell(cells) {
 export function assign_operators(n, difficulty, special) {
     var out = create_puzzle(n, difficulty, special[3]);
     var solo_clue = false;
+    var solo_loc = null;
+    let c = null;
     for (let i in out[2]) {
         if (out[2][i].length == 1) {
-            solo_clue = true;
+            c = out[2][i][0];
+            //console.log(c)
+            if ((c[0] == 0 || c[0] == n-1 || c[1] == 0 || c[1] == n-1) == false) {
+                solo_clue = true;
+                solo_loc = i;
+            }
         }
     }
     while (solo_clue == false) {
         out = create_puzzle(n, difficulty, special[3]);
         solo_clue = false;
+        solo_loc = null;
         for (let i in out[2]) {
             if (out[2][i].length == 1) {
-                solo_clue = true;
+                c = out[2][i][0];
+                if ((c[0] == 0 || c[0] == n-1 || c[1] == 0 || c[1] == n-1) == false) {
+                    solo_clue = true;
+                    solo_loc = i;
+                }
             }
-    }
+        }
     }
     var grid = out[0];
     var cage_grid = out[1];
@@ -346,7 +358,7 @@ export function assign_operators(n, difficulty, special) {
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
-        if (cells.length == 1 && hidden == false) {
+        if (id == solo_loc && hidden == false) {
             cage_operators_values[id] = ["HIDE", val];
             hidden = true;
         }

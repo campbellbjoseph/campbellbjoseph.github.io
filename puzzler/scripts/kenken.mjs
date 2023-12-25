@@ -137,7 +137,7 @@ function setGame() {
     //console.log(s)
     //console.log(p)
     solution = grid;
-    console.log(grid);
+    console.log(out);
     console.log(att);
     //console.log(grid);
     //console.log(cage_grid);
