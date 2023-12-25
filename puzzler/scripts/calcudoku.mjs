@@ -1,4 +1,4 @@
-import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions, precompute } from "./generate_kenken.mjs";
+import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions, precompute } from "./generate_calcudoku.mjs";
 
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
