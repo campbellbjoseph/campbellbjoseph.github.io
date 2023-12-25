@@ -28,6 +28,7 @@ var affectedTiles = null;
 var given = new Array();
 var used_notes = false;
 var paused = false;
+var saved_state = null;
 
 var notes = new Map();
 
@@ -449,6 +450,13 @@ function setGame() {
         }
         if (event.code == "KeyM") {
             master_minus();
+        }
+        if (event.code == "KeyS") {
+            save_current();
+        }
+        if (event.code == "KeyR") {
+            return_to_save();
+            saved_state = null;
         }
     });
 
@@ -1015,17 +1023,31 @@ function displayWin() {
     if (used_notes == false) {
         document.getElementById("title").innerHTML += "<h2>&#x2B50 Mental Master &#x2B50</h2>"
     }
-    let new_game = document.createElement("form");
-    new_game.action = "/puzzler/index.html";
-    new_game.id = "new_game";
-    new_game.classList.add()
+    let menu = document.createElement("form");
+    menu.action = "/puzzler/index.html";
+    menu.id = "menu";
     let b = document.createElement("input");
     b.type = "submit";  
-    b.value = "New game";
-    b.classList.add("new_game");
-    lock_buttons();
-    document.getElementById("buttons").append(new_game);
-    document.getElementById("new_game").append(b);
+    b.value = "Menu";
+    b.classList.add("menu");
+    document.getElementById("submit").remove();
+    document.getElementById("del").remove();
+    document.getElementById("note").remove();
+    document.getElementById("reset").remove();
+    document.getElementById("undo").remove();
+
+    let re = document.createElement("div");
+    re.classList.add("menu");
+    re.style.backgroundColor = "blue"
+    re.style.width = "120px"
+    re.innerHTML = "Play again"
+    re.addEventListener("click", function(event) {
+        location.reload();
+    })
+
+    document.getElementById("buttons").append(menu);
+    document.getElementById("buttons").append(re);
+    document.getElementById("menu").append(b);
     
 }
 
@@ -1210,5 +1232,82 @@ function undo_insertion() {
         lastInsertion = null;
         affectedTiles = null;
         remove_undo();
+    }
+}
+
+function save_current() {
+    resetButtons();
+    if (saved_state == null) {
+        let title = document.getElementById("title");
+        let sav = document.createElement("div");
+        sav.style.fontSize = "40"
+        sav.innerHTML = "Game state saved. Press R to return."
+        sav.id = "sav"
+        title.append(sav)
+        saved_state = new Object();
+        saved_state["notes"] = new Map(JSON.parse(JSON.stringify(Array.from(notes))));
+        let val = new Map();
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let t = document.getElementById(i.toString() + "-" + j.toString());
+                if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                    val.set(t.id, t.innerHTML);
+                }
+            }
+        }
+        saved_state["vals"] = new Map(JSON.parse(JSON.stringify(Array.from(val))));
+        console.log(saved_state["notes"])
+    }
+}
+
+function return_to_save() {
+    resetButtons();
+    if (saved_state != null) {
+        if (confirm("Are you sure you want to return to the previous save state?")) {
+            document.getElementById("sav").remove();
+            //console.log(notes)
+            notes = new Map(JSON.parse(JSON.stringify(Array.from(saved_state["notes"]))));
+            //console.log(notes)
+            let zz = new Map(JSON.parse(JSON.stringify(Array.from(saved_state["vals"]))));
+
+            //console.log(zz)
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    let t = document.getElementById(i.toString() + "-" + j.toString());
+                    if (zz.has(t.id)) {
+                        t.innerHTML = zz.get(t.id);;
+                    }
+                    else {
+                        if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                            t.innerHTML = t.innerHTML.toString().slice(1);
+                        }
+                    }
+                }
+            }
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    let t = document.getElementById(i.toString() + "-" + j.toString());
+                    if (notes.has(t.id) && notes.get(t.id).length > 0) {
+                        console.log(t)
+                        console.log(notes.get(t.id))
+                        scrub(t);
+                        resolveTile(t);
+                    } else {
+                        scrub(t);
+                        notes.set(t.id, [])
+                    }
+                }
+            }
+        }
+    }   
+}
+
+function scrub(tile) {
+    let i = 0;
+    let p = document.getElementById(tile.id + ":note" + i.toString());
+    while (p != null) {
+        p.remove()
+        i += 1
+        p = document.getElementById(tile.id + ":note" + i.toString());
     }
 }

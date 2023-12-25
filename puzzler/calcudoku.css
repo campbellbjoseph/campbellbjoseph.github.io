@@ -106,8 +106,8 @@ hr {
     align-items: center;
 }
 
-.new_game {
-    width: 120px;
+.menu {
+    width: 80px;
     height: 50px;
     border: 1px solid black;
     margin: 2px;
