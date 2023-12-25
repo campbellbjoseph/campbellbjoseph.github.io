@@ -36,6 +36,9 @@
         <label for="z">Zero</label>
         <input type="checkbox" id="zero" name="zero">
         <br>
+        <label for="q">Hidden clues?</label>
+        <input type="checkbox" id="hidden" name="hidden">
+        <br>
         <button onclick="proceed()" class = "button">Start</button>
         <br>
         <br>
@@ -62,6 +65,11 @@
                     s += "|0"
                 }
                 if (document.getElementById("zero").checked) {
+                    s += "|1"
+                } else {
+                    s += "|0"
+                }
+                if (document.getElementById("hidden").checked) {
                     s += "|1"
                 } else {
                     s += "|0"

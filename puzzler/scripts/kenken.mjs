@@ -7,8 +7,10 @@ var mod = parseInt(queryString[2]);
 var gcd = parseInt(queryString[3]);
 var lcm = parseInt(queryString[4]);
 var zero_allowed = parseInt(queryString[5]);
+var hidden_clues = parseInt(queryString[6]);
 var need_special = mod + gcd + lcm;
-var special = [mod, gcd, lcm, zero_allowed]
+var special = [mod, gcd, lcm, zero_allowed, hidden_clues]
+var hidden_ans = null;
 
 var numSelected = null;
 var tileSelected = null;
@@ -166,12 +168,19 @@ function setGame() {
             tile.id = cells[0][0].toString() + "-" + cells[0][1].toString();
             inst.id = tile.id + ":" + data[1].toString() + data[0];
             inst.innerText = data[1].toString();
+            if (hidden_clues == 1 && data[0] == "HIDE") {
+                inst.innerText = "";
+            }
             inst.classList.add("instruction");
             tile.classList.add("thick-top");
             tile.classList.add("thick-bottom");
             tile.classList.add("thick-right");
             tile.classList.add("thick-left");
             tile.innerText = data[1];
+            if (hidden_clues == 1 && data[0] == "HIDE") {
+                tile.innerText = "X";
+                hidden_ans = data[1];
+            }
             tile.classList.add("tile");
             tile.append(inst);
             if (cells[0][0] == 0) {
@@ -302,6 +311,25 @@ function setGame() {
     pause.addEventListener("mouseleave", exitReset);
     document.getElementById("title").append(pause);
     add_pause();
+
+    if (hidden_clues == 1) {
+        let s = document.getElementById("solving");
+        s.style.position = "relative"
+        let x = document.createElement("label");
+        x.innerHTML = "<b>X = </b>"
+        x.style.fontSize = "20"
+        s.append(x);
+        let xx = document.createElement("input");
+        xx.type = "number";
+        x.style.position = "relative"
+        x.style.paddingLeft = "30px"
+        s.append(xx);
+        xx.style.width = "50px"
+        xx.style.heigh = "50px"
+        xx.min = (1-zero_allowed).toString()
+        xx.max = (n-zero_allowed).toString()
+        xx.id = "submission"
+    }
 
     window.addEventListener("keydown", function(event) {
         if (tileHovered != null && event.code.slice(0, 5) == "Digit") {
@@ -510,7 +538,7 @@ function removeNote(tile, note) {
     let arr = notes.get(tile.id);
     //console.log(arr.indexOf(parseInt(note)))
     arr.splice(arr.indexOf(parseInt(note)), 1)
-    console.log(arr)
+    //console.log(arr)
     notes.set(tile.id, arr);
     resolveTile(tile);
 }
@@ -805,30 +833,41 @@ function findMistakes() {
 
 function checkMistakes() {
     stopDeleting();
-    let mistakeList = findMistakes();
-    let mistakes = mistakeList.length;
-    
-    for (let i = 0; i < mistakes; i++) {
-        mistakeList[i].classList.add("wrong-tile");
-    }
+    if (hidden_clues == 0) {
+        let mistakeList = findMistakes();
+        let mistakes = mistakeList.length;
+        
+        for (let i = 0; i < mistakes; i++) {
+            mistakeList[i].classList.add("wrong-tile");
+        }
 
-    let errorList = findErrors();
-    let errors = errorList.length;
-    if (errors == 0) {
-        displayWin();
-        return;
-    }
+        let errorList = findErrors();
+        let errors = errorList.length;
+        if (errors == 0) {
+            displayWin();
+            return;
+        }
 
 
-    if (mistakes == 0) {
-        console.log("Success!");
+        if (mistakes == 0) {
+            console.log("Success!");
+        } else {
+            let check = document.getElementById("submit");
+            check.innerText = "";
+            check.removeEventListener("click", checkMistakes);
+            check.addEventListener("click", clearMistakes);
+            add_x("check");
+        }
     } else {
-        let check = document.getElementById("submit");
-        check.innerText = "";
-        check.removeEventListener("click", checkMistakes);
-        check.addEventListener("click", clearMistakes);
-        add_x("check");
+        let xx = document.getElementById("submission");
+        if (parseInt(xx.value) == hidden_ans) {
+            displayWin();
+            return;
+        } else{
+            alert("Wrong value for X! Try again!");
+        }
     }
+    
 }
 
 function displayWin() {

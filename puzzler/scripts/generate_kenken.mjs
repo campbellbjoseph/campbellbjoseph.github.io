@@ -284,12 +284,28 @@ export function find_best_cell(cells) {
 
 export function assign_operators(n, difficulty, special) {
     var out = create_puzzle(n, difficulty, special[3]);
+    var solo_clue = false;
+    for (let i in out[2]) {
+        if (out[2][i].length == 1) {
+            solo_clue = true;
+        }
+    }
+    while (solo_clue == false) {
+        out = create_puzzle(n, difficulty, special[3]);
+        solo_clue = false;
+        for (let i in out[2]) {
+            if (out[2][i].length == 1) {
+                solo_clue = true;
+            }
+    }
+    }
     var grid = out[0];
     var cage_grid = out[1];
     var cage_cells = out[2];
 
     var cage_operators_values = {};
     var at_least_one_special = false;
+    var hidden = false;
     for (let id in cage_cells) {
         let cells = cage_cells[id];
         let op = ["+", "x"];
@@ -330,6 +346,10 @@ export function assign_operators(n, difficulty, special) {
             val = find_value(grid, operation, cells);
         }
         cage_operators_values[id] = [operation, val];
+        if (cells.length == 1 && hidden == false) {
+            cage_operators_values[id] = ["HIDE", val];
+            hidden = true;
+        }
         if ((operation == "%" || operation == "gcd" || operation == "lcm") && cells.length > 1) {
             at_least_one_special = true;
         }
