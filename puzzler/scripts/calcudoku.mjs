@@ -55,7 +55,8 @@ function zero2D(k) {
 
 function decipher(query) {
     n = random_seed.indexOf(query[0][0]);
-    let temp = random_seed.indexOf(query[0][1]);
+    diff = random_seed.indexOf(query[0][1]);
+    let temp = random_seed.indexOf(query[0][2]);
     temp = temp.toString(2);
     while (temp.length < 5) {
         temp = "0" + temp;
@@ -148,7 +149,7 @@ function stopwatch() {
 }
 
 function puzzle_id(cage_grid, cage_operators_values) {
-    let ans = random_seed[n]
+    let ans = random_seed[n] + random_seed[diff];
     let s = mod.toString() + gcd.toString() + lcm.toString() + zero_allowed.toString() + hidden_clues.toString();
     ans += random_seed[parseInt(s, 2)] + "-";
     for (let i = 0; i < n; i++) {
@@ -513,6 +514,7 @@ function setGame() {
         uid.value = uv;
         uid.innerHTML = "<b>Unique Puzzle ID:</b> " + uv.substring(0,10) + "...";
     } else {
+        uid.value = queryString[1];
         uid.innerHTML = "<b>Unique Puzzle ID:</b> " + queryString[1].substring(0,10) + "...";
     }
     
@@ -1154,7 +1156,8 @@ function displayWin() {
     document.getElementById("submit").remove();
     document.getElementById("del").remove();
     document.getElementById("note").remove();
-    document.getElementById("reset").remove();
+    document.getElementById("reset").removeEventListener("click", resetBoard);
+    document.getElementById("reset").addEventListener("click", tryAgain);
     document.getElementById("undo").remove();
 
     let re = document.createElement("div");
@@ -1163,13 +1166,19 @@ function displayWin() {
     re.style.width = "120px"
     re.innerHTML = "Play again"
     re.addEventListener("click", function(event) {
-        location.reload();
+        location.href = "puzzle.html?" + n.toString() + "|" + diff.toString() + "|" + mod.toString() + "|" + gcd.toString() + "|" + lcm.toString() + "|" + zero_allowed.toString() + "|" + hidden_clues.toString();
     })
 
     document.getElementById("buttons").append(menu);
     document.getElementById("buttons").append(re);
     document.getElementById("menu").append(b);
     
+}
+
+function tryAgain() {
+    if (confirm("Would you like to re-do this puzzle?")) {
+        location.href = "puzzle.html?0|" + document.getElementById("uid").value;
+    }
 }
 
 function lock_buttons() {
