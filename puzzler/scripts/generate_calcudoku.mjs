@@ -613,6 +613,48 @@ export function solutions(n, cur_grid, cage_cells, cage_operators_values, precom
     return ans;
 }
 
+export function solve(n, cur_grid, cage_cells, cage_operators_values, precomp, zero_allowed) {
+    let r = 0;
+    let c = 0;
+    let incomplete = false;
+    for (r = 0; r < n; r++) {
+        for (c = 0; c < n; c++) {
+            if (cur_grid[r][c] == -1) {
+                incomplete = true;
+                break;
+            }
+        }
+        if (incomplete) {
+            break;
+        }
+    }
+
+    if (incomplete == false) {
+        return cur_grid;
+    }
+
+    let ans = 0;
+    //console.log(precomp)
+    let possible_vals = precomp.get(r.toString() + "-" + c.toString());
+    //console.log(precomp)
+    for (let j = 0; j <= possible_vals.length; j++) {
+        let i = possible_vals[j];
+        if (safe_row_col(n, cur_grid, [r,c], i) && safe_cage(n, cur_grid, cage_cells, cage_operators_values, [r,c], i, zero_allowed) && i != null) {
+            let next_grid = JSON.parse(JSON.stringify(cur_grid));
+            next_grid[r][c] = i;
+            //console.log(next_grid);
+            let s = solve(n, next_grid, cage_cells, cage_operators_values, precomp, zero_allowed)
+            if (s != -1) {
+                return s;
+            }
+            //if (ans > 1) {
+            //    return ans; // no longer accurate, cutting search short to save time
+            //}
+        }
+    }
+    return -1;
+}
+
 function p_vals(n, oper, len, zero_allowed) {
     let func = oper[0];
     let val = oper[1];
@@ -649,3 +691,4 @@ function p_vals(n, oper, len, zero_allowed) {
     }
     return ans;
 }
+

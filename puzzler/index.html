@@ -17,7 +17,11 @@
     <body>
         <h1>Welcome to SuperCalc!</h1>
         <hr>
-        
+        <label for="uid">Paste unique puzzle ID: </label>
+        <input type="text" id="unique_id" style="width: auto">
+        <button onclick="use_id()">Go</button>
+        <br>
+        <p>Or generate new puzzle:</p>
         <label for="size">Size (3-12):</label>
         <input type="number" id="size" name="size" min="3" max="12" value="6">
         <br>
@@ -45,6 +49,9 @@
         <button onclick="display()" class = "button" id = "inst">Instructions</button>
         <div id="bottom" style="text-align: center;"></div>
         <script>
+            function use_id() {
+                location.href = "puzzle.html?0|" + document.getElementById("unique_id").value
+            }
             function proceed() {
                 let s = "puzzle.html?" + document.getElementById("size").value + 
                 "|" + document.getElementById("diff").value;

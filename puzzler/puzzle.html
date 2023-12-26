@@ -30,7 +30,9 @@
 
         <div id="board"></div>
         <br>
-        <div id="solving"></div>
+        <div id="solving">
+            <button onclick="myFunction()" id="copybutton">Copy Puzzle ID</button>
+        </div>
         <div id="digits">
         </div>
         <div id="buttons"></div>
@@ -70,8 +72,16 @@
                 d.innerHTML += "<b>Zero:</b> Puzzle will include numbers from 0 -> N-1. Modulo, GCD, LCM, and Division clues will not include zero (e.g. 6+ [6,0], [1,5], etc. in a 7x7)<br>"
                 d.innerHTML += "<b>Hidden clues:</b> Solve for X, with or without solving the entire puzzle!"
                 document.getElementById("inst").onclick = "rem()";
-                document.getElementById("inst").innerText = "Clear";
-}
+                document.getElementById("inst").innerText = "Clear"; 
+            }
+
+            function myFunction() {
+                let uid = document.getElementById("uid");
+                //uid.select(); 
+                //uid.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(uid.value);
+                document.getElementById("copybutton").innerHTML = "Copied!"
+            }
         </script>
     </body>
 

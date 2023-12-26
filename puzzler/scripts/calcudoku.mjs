@@ -1,17 +1,98 @@
-import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions, precompute } from "./generate_calcudoku.mjs";
+import { assign_operators, find_best_cell, are_adjacent, tangent_border, solutions, precompute, solve } from "./generate_calcudoku.mjs";
+const random_seed = "ugMyQszjSnLoDBfVOPrTNvYEJmKbRixItceClXqkAFUHdGwZahpW"
+const random_ops = "PprTndbsGOWQCgxUkFfqEMDXLwHuvmVihcjyIztBRKNAoSZaeYlJ"
+const op_map = {"+": "q", 
+                "x": "p", 
+                "-": "G", 
+                "/": "e", 
+                "gcd": "k", 
+                "lcm": "Z",
+                "%": "W", 
+                "HIDE": "h"}
+
+const reverse_op =  {"q": "+", 
+                    "p": "x", 
+                    "G": "-", 
+                    "e": "/", 
+                    "k": "gcd", 
+                    "Z": "lcm",
+                    "W": "%", 
+                    "h": "HIDE"}
 
 var queryString = location.search.substring(1).split("|");
 var n = parseInt(queryString[0]);
-var diff = parseInt(queryString[1]);
-var mod = parseInt(queryString[2]);
-var gcd = parseInt(queryString[3]);
-var lcm = parseInt(queryString[4]);
-var zero_allowed = parseInt(queryString[5]);
-var hidden_clues = parseInt(queryString[6]);
-var need_special = mod + gcd + lcm;
-var special = [mod, gcd, lcm, zero_allowed, hidden_clues]
-var hidden_ans = null;
-var hidden_id = null;
+var generated = false;
+var diff, mod, gcd, lcm, zero_allowed, hidden_clues, need_special, special, hidden_ans, hidden_id, qq;
+if (n > 0) {
+    generated = true;
+    diff = parseInt(queryString[1]);
+    mod = parseInt(queryString[2]);
+    gcd = parseInt(queryString[3]);
+    lcm = parseInt(queryString[4]);
+    zero_allowed = parseInt(queryString[5]);
+    hidden_clues = parseInt(queryString[6]);
+    need_special = mod + gcd + lcm;
+    special = [mod, gcd, lcm, zero_allowed, hidden_clues]
+    hidden_ans = null;
+    hidden_id = null;
+} else {
+    qq = queryString[1].split("-")
+    console.log(qq)
+}
+
+function zero2D(k) {
+    let arr = Array(k);
+    for (let i = 0; i < k; i++) {
+        arr[i] = Array(k);
+    }
+    for (let i = 0; i < k; i++) {
+        for (let j = 0; j < k; j++) {
+            arr[i][j] = -1;
+        }
+    }
+    return arr;
+  }
+
+function decipher(query) {
+    n = random_seed.indexOf(query[0][0]);
+    let temp = random_seed.indexOf(query[0][1]);
+    temp = temp.toString(2);
+    while (temp.length < 5) {
+        temp = "0" + temp;
+    }
+    mod = parseInt(temp[0]);
+    gcd = parseInt(temp[1]);
+    lcm = parseInt(temp[2]);
+    zero_allowed = parseInt(temp[3]);
+    hidden_clues = parseInt(temp[4]);
+    need_special = mod + gcd + lcm;
+    special = [mod, gcd, lcm, zero_allowed, hidden_clues];
+
+    var cg = zero2D(n);
+    let curr_row = 0;
+    let cc = {};
+    for (let i = 0; i < query[1].length; i++) {
+        curr_row = Math.floor(i / n);
+        cg[curr_row][i % n] = random_seed.indexOf(query[1][i])
+        if (cc[random_seed.indexOf(query[1][i])] == null) {
+            cc[random_seed.indexOf(query[1][i])] = new Array();
+        }
+        cc[random_seed.indexOf(query[1][i])].push([curr_row, i % n])
+    }
+    let spl = query[2].split("*");
+    var cov = {};
+    for (let i = 0; i < spl.length - 1; i++) {
+        let uu = spl[i];
+        let id = random_ops.indexOf(uu[0]);
+        let op = reverse_op[uu[1]];
+        let val = parseInt(uu[3]) * random_ops.length + parseInt(random_ops.indexOf(uu[2]))
+        cov[id] = [op, val];
+    }
+    
+    var p = precompute(n, cc, cov, zero_allowed);
+    var grid = do_outputs(n, cc, cov, p, zero_allowed);
+    return [grid, cg, cc, cov]
+}
 
 var numSelected = null;
 var tileSelected = null;
@@ -66,18 +147,24 @@ function stopwatch() {
     }
 }
 
-function zero2D(k) {
-    let arr = Array(k);
-    for (let i = 0; i < k; i++) {
-        arr[i] = Array(k);
-    }
-    for (let i = 0; i < k; i++) {
-        for (let j = 0; j < k; j++) {
-            arr[i][j] = -1;
+function puzzle_id(cage_grid, cage_operators_values) {
+    let ans = random_seed[n]
+    let s = mod.toString() + gcd.toString() + lcm.toString() + zero_allowed.toString() + hidden_clues.toString();
+    ans += random_seed[parseInt(s, 2)] + "-";
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            ans += random_seed[cage_grid[i][j]];
         }
     }
-    return arr;
-  }
+    ans += "-"
+    for (let id in cage_operators_values) {
+        ans += random_ops[id]
+        ans += op_map[cage_operators_values[id][0]];
+        ans += random_ops[cage_operators_values[id][1] % random_ops.length] + Math.floor(cage_operators_values[id][1] / random_ops.length)
+        ans += "*"
+    }
+    return ans;
+}
 
 function do_outputs(m, cc, cov, p, z) {
     //console.log("--------------------------");
@@ -90,7 +177,10 @@ function do_outputs(m, cc, cov, p, z) {
     }
     //console.log(initial_array);
     //console.log("Starting: ");
-    return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p, z);
+    if (generated) {
+        return solutions(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p, z);
+    }
+    return solve(m, JSON.parse(JSON.stringify(initial_array)), cc, cov, p, z);
 }
 
 function evaluate_hidden(n, cage_cells, cage_operators_values, p, z) {
@@ -157,51 +247,27 @@ function simulate(n, iter) {
 }
 
 function setGame() {
-    var out = assign_operators(n, diff, special);
-    var grid = out[0];
-    var cage_grid = out[1];
-    var cage_cells = out[2];
-    var cage_operators_values = out[3];
-    var at_least_one_special = out[4];
-    var p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
-    //console.log(out)
-    //console.log(need_special)
-    //console.log(need_special > 0 && at_least_one_special == false)
-    let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
-    //console.log(p)
-    //console.log(s)
-    let z = null;
-    if (hidden_clues == 1) {
-        for (let id in cage_cells) {
-            let cells = cage_cells[id];
-            let data = cage_operators_values[id];
-            if (cells.length == 1 && hidden_clues == 1 && data[0] == "HIDE") {
-                hidden_ans = data[1];
-                hidden_id = id;
-            }
-        }
-        z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed)[0];
-
-    }
-    let att = 1;
-    while ((s != 1 || (need_special > 0 && at_least_one_special == false)) || (hidden_clues == 1 && z == false)) {
-        if (s != 1) {
-            console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
-        } else if ((need_special > 0 && at_least_one_special == false)) {
-            console.log("Attempt " + att.toString() + ": Failed due to lack of special")
-        } else {
-            console.log("Attempt " + att.toString() + ": Failed due multiple X's")
-        }
-        
-        att++;
+    var out;
+    var grid;
+    var cage_grid;
+    var cage_cells;
+    var cage_operators_values;
+    
+    if (generated) {
         out = assign_operators(n, diff, special);
         grid = out[0];
         cage_grid = out[1];
         cage_cells = out[2];
         cage_operators_values = out[3];
-        at_least_one_special = out[4];
-        p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
-        s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        var at_least_one_special = out[4];
+        var p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
+        //console.log(out)
+        //console.log(need_special)
+        //console.log(need_special > 0 && at_least_one_special == false)
+        let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        //console.log(p)
+        //console.log(s)
+        let z = null;
         if (hidden_clues == 1) {
             for (let id in cage_cells) {
                 let cells = cage_cells[id];
@@ -212,13 +278,53 @@ function setGame() {
                 }
             }
             z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed)[0];
+
         }
+        let att = 1;
+        while ((s != 1 || (need_special > 0 && at_least_one_special == false)) || (hidden_clues == 1 && z == false)) {
+            if (s != 1) {
+                console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
+            } else if ((need_special > 0 && at_least_one_special == false)) {
+                console.log("Attempt " + att.toString() + ": Failed due to lack of special")
+            } else {
+                console.log("Attempt " + att.toString() + ": Failed due multiple X's")
+            }
+            
+            att++;
+            out = assign_operators(n, diff, special);
+            grid = out[0];
+            cage_grid = out[1];
+            cage_cells = out[2];
+            cage_operators_values = out[3];
+            at_least_one_special = out[4];
+            p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
+            s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+            if (hidden_clues == 1) {
+                for (let id in cage_cells) {
+                    let cells = cage_cells[id];
+                    let data = cage_operators_values[id];
+                    if (cells.length == 1 && hidden_clues == 1 && data[0] == "HIDE") {
+                        hidden_ans = data[1];
+                        hidden_id = id;
+                    }
+                }
+                z = evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed)[0];
+            }
+        }
+        //console.log(s)
+        //console.log(p)
+        console.log(out);
+        console.log(att);
+    } else {
+        out = decipher(qq);
+        grid = out[0];
+        cage_grid = out[1];
+        cage_cells = out[2];
+        cage_operators_values = out[3];
     }
-    //console.log(s)
-    //console.log(p)
+    
     solution = grid;
-    console.log(out);
-    console.log(att);
+    
     //console.log(grid);
     //console.log(cage_grid);
     //console.log(cage_cells);
@@ -347,7 +453,7 @@ function setGame() {
         }
     }
 
-    if (hidden_clues == 1) {
+    if (hidden_clues == 1 && generated) {
         evaluate_hidden(n, cage_cells, cage_operators_values, p, zero_allowed);
     }
     let submit = document.createElement("div");
@@ -396,6 +502,21 @@ function setGame() {
     pause.addEventListener("mouseleave", exitReset);
     document.getElementById("title").append(pause);
     add_pause();
+
+    let qw = document.getElementById("solving");
+    qw.style.position = "relative"
+    let uid = document.createElement("div")
+    uid.id = "uid";
+    uid.style.fontSize = "15"
+    if (generated) {
+        let uv = puzzle_id(cage_grid, cage_operators_values);
+        uid.value = uv;
+        uid.innerHTML = "<b>Unique Puzzle ID:</b> " + uv.substring(0,10) + "...";
+    } else {
+        uid.innerHTML = "<b>Unique Puzzle ID:</b> " + queryString[1].substring(0,10) + "...";
+    }
+    
+    qw.append(uid);
 
     if (hidden_clues == 1) {
         let s = document.getElementById("solving");
