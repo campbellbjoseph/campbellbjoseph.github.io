@@ -1244,6 +1244,14 @@ function exitNote() {
 function takeNotes() {
     if (takingNotes == false) {
         takingNotes = true;
+        let title = document.getElementById("note-div");
+        let sav = document.createElement("div");
+        sav.style.paddingBottom = "5px"
+        sav.style.fontSize = "25"
+        sav.innerHTML = "Taking notes."
+        sav.id = "note-taking"
+        title.append(sav)
+
         let no = document.getElementById("note");
         no.innerText = "";
         no.removeEventListener("click", takeNotes);
@@ -1316,6 +1324,7 @@ function subtract_all() {
 
 function stopNotes() {
     if (takingNotes == true) {
+        document.getElementById("note-taking").remove();
         takingNotes = false;
         let no = document.getElementById("note");
         no.innerText = "";
@@ -1387,6 +1396,21 @@ function save_current() {
         }
         saved_state["vals"] = new Map(JSON.parse(JSON.stringify(Array.from(val))));
         console.log(saved_state["notes"])
+    } else {
+        if (confirm("Are you sure you want to overwrite your save?")) {
+            saved_state = new Object();
+            saved_state["notes"] = new Map(JSON.parse(JSON.stringify(Array.from(notes))));
+            let val = new Map();
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    let t = document.getElementById(i.toString() + "-" + j.toString());
+                    if (t.innerHTML.length > 0 && t.innerHTML[0] != "<") {
+                        val.set(t.id, t.innerHTML);
+                    }
+                }
+            }
+            saved_state["vals"] = new Map(JSON.parse(JSON.stringify(Array.from(val))));
+        }
     }
 }
 

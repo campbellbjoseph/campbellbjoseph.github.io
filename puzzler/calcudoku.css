@@ -199,6 +199,10 @@ img {
     background-color: rgb(220, 246, 255);
 }
 
+.tile-hovered-noting {
+    background-color: rgb(174, 130, 217);
+}
+
 .tile-selected {
     background-color: rgb(96, 213, 252);
 }
