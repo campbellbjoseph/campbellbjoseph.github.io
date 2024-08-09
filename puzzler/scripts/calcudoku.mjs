@@ -1089,7 +1089,6 @@ function checkMistakes() {
 }
 
 function displayWin() {
-    startFireworks();
     let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Fast as lightning!", "Speedy Gonzalez!", "Speedster!"]
     let fast_messages = ["Quick!", "Super star!", "Run Forrest run!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
@@ -1104,11 +1103,16 @@ function displayWin() {
     let f_cutoff = [0,0,0,30,60,120,180,360,660,900,1200,1800,2400]
     let r_cutoff = [0,0,0,45,100,180,300,480,900,1200,1800,2400,3600]
     let s_cutoff = [0,0,0,75,150,240,390,600,1020,1500,2200,2800,4200]
-
+    let fire_cutoff = [0,0,0,10,20,60,100,200,420,500,750,1000,1500]
+    
+    let fire = fire_cutoff[n]**(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
     let sf = sf_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
     let f = f_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
     let r = r_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
     let s = s_cutoff[n]*(1+0.2*diff+0.2*need_special+0.3*zero_allowed);
+    if (score <= fire) {
+        startFireworks();
+    }
     if (score <= sf) {
         arr = super_fast_messages;
         speed = 2;
