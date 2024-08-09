@@ -1089,6 +1089,7 @@ function checkMistakes() {
 }
 
 function displayWin() {
+    startFireworks();
     let super_fast_messages = ["Super sonic!", "Speed demon!", "Speeeeedy!", "Fast as lightning!", "Speedy Gonzalez!", "Speedster!"]
     let fast_messages = ["Quick!", "Super star!", "Run Forrest run!", "Heroic.", "Legendary!"]
     let messages = ["Winner!", "Champ!", "Woooo!", "Too easy.", "Easy $$$", "Superb!", "Puzzle master!", "Gold star for you!", "Money shot!", "Swish!"];
@@ -1159,7 +1160,6 @@ function displayWin() {
     document.getElementById("reset").removeEventListener("click", resetBoard);
     document.getElementById("reset").addEventListener("click", tryAgain);
     document.getElementById("undo").remove();
-    startFireworks()
     let re = document.createElement("div");
     re.classList.add("menu");
     re.style.backgroundColor = "blue"
@@ -1176,8 +1176,9 @@ function displayWin() {
 }
 
 function startFireworks() {
-    const numberOfFireworks = 10;
+    const numberOfFireworks = 500;
     for (let i = 0; i < numberOfFireworks; i++) {
+        console.log("creating")
         createFirework();
     }
     setTimeout(stopFireworks, 10000); // Stop fireworks after 5 seconds
@@ -1197,7 +1198,7 @@ function createFirework() {
 
     firework.style.left = `${positionX}px`;
     firework.style.top = `${positionY}px`;
-    
+
     const randomColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
     firework.style.background = `radial-gradient(circle, ${randomColor} 30%, rgba(255, 255, 255, 0) 60%)`;
 
