@@ -1,117 +1,190 @@
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width initial-scale=1.0 user-scalable=no">
-        <title>SuperCalc</title>
-        <link rel="stylesheet" href="index.css">
-    </head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-78B3CE9ZLV"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-78B3CE9ZLV');
-    </script>
-    <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SuperCalc</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .container label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .container input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .container input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .container input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        .container button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container button:hover {
+            background-color: #45a049;
+        }
+
+        .container a {
+            text-decoration: none;
+            color: #4CAF50;
+            display: block;
+            margin-top: 20px;
+        }
+
+        .container a:hover {
+            text-decoration: underline;
+        }
+
+        .checkbox-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .checkbox-group label {
+            flex: 1;
+            text-align: center;
+        }
+
+        #bottom {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
         <h1>Welcome to SuperCalc!</h1>
         <a href="../index.html">Return to home page</a>
         <hr>
-        <label for="uid">Paste unique puzzle ID: </label>
-        <input type="text" id="unique_id" style="width: auto">
+        <label for="uid">Paste unique puzzle ID:</label>
+        <input type="text" id="unique_id">
         <button onclick="use_id()">Go</button>
-        <br>
-        <p>Or generate new puzzle:</p>
+
+        <p>Or generate a new puzzle:</p>
         <label for="size">Size (3-12):</label>
         <input type="number" id="size" name="size" min="3" max="12" value="6">
-        <br>
+        
         <label for="size">Difficulty (0-2):</label>
         <input type="number" id="diff" name="diff" min="0" max="2" value="0">
-        <br>
-        <label for="m">Modulo</label>
-        <input type="checkbox" id="mod" name="mod">
-        <br>
-        <label for="g">GCD</label>
-        <input type="checkbox" id="gcd" name="gcd">
-        <br>
-        <label for="l">LCM</label>
-        <input type="checkbox" id="lcm" name="lcm">
-        <br>
-        <label for="z">Zero</label>
-        <input type="checkbox" id="zero" name="zero">
-        <br>
-        <label for="q">Hidden clues</label>
-        <input type="checkbox" id="hidden" name="hidden">
-        <br>
-        <button onclick="proceed()" class = "button">Start</button>
-        <br>
-        <br>
-        <button onclick="display()" class = "button" id = "inst">Instructions</button>
-        <div id="bottom" style="text-align: center;"></div>
-        <script>
-            function use_id() {
-                location.href = "puzzle.html?0|" + document.getElementById("unique_id").value
-            }
-            function proceed() {
-                let s = "puzzle.html?" + document.getElementById("size").value + 
-                "|" + document.getElementById("diff").value;
-                 
-                if (document.getElementById("mod").checked) {
-                    s += "|1"
-                } else {
-                    s += "|0"
-                }
-                if (document.getElementById("gcd").checked) {
-                    s += "|1"
-                } else {
-                    s += "|0"
-                }
-                if (document.getElementById("lcm").checked) {
-                    s += "|1"
-                } else {
-                    s += "|0"
-                }
-                if (document.getElementById("zero").checked) {
-                    s += "|1"
-                } else {
-                    s += "|0"
-                }
-                if (document.getElementById("hidden").checked) {
-                    s += "|1"
-                } else {
-                    s += "|0"
-                }
-                location.href = s;
-            }
-            function display() {
-                let d = document.createElement("div");
-                d.style = "display:inline-block; text-align: left;";
-                d.id = "instructions"
-                d.innerHTML = "The objective of this game is to fill in the NxN square provided with the numbers 1-N.<br>"
-                d.innerHTML += "There are a number of different operations, which can be seen below<br>"
-                d.innerHTML += "<b>Addition (+):</b> The numbers in the cell must sum to the desired amount (e.g. 5+ => [2,3] or [1,4] in a 4x4 puzzle)<br>"
-                d.innerHTML += "<b>Subtraction (-):</b> The larger number in the cell minus the smaller number in the cell equals the desired amount (e.g. 2- => [4,2] or [3,1] in a 4x4)<br>"
-                d.innerHTML += "<b>Multiplication (x):</b> The numbers in the cell must multiply to the desired amount (e.g. 6x => [2,3] in a 4x4)<br>"
-                d.innerHTML += "<b>Division (/):</b> The larger number in the cell divided by the smaller number in the cell equals the desired amount (e.g. 2/ => [4,2] or [2,1] in a 4x4)<br>"
-                d.innerHTML += "<h4>Special Operations/Modifications (optional)<h4>"
-                d.innerHTML += "<b>Modulo (%):</b> The <u>remainder</u> when the larger number is divided by the smaller number is the desired amount (e.g. 1% => [4,3] or [3,2] in a 4x4)<br>"
-                d.innerHTML += "<b>Greatest Common Divisor (gcd):</b> The largest number that divides all numbers in the cell (e.g. gcd2 => [2,4,6], etc. in a 6x6 puzzle)<br>"
-                d.innerHTML += "<b>Least Common Multiple (lcm):</b> The smallest number that is divisible by all numbers in the cell (e.g. lcm6 => [1,6], [2,6], [2,3], etc. in a 6x6)<br>"
-                d.innerHTML += "<b>Zero:</b> Puzzle will include numbers from 0 -> N-1. Modulo, GCD, LCM, and Division clues will not include zero (e.g. 6+ [6,0], [1,5], etc. in a 7x7)<br>"
-                d.innerHTML += "<b>Hidden clues:</b> Solve for X, with or without solving the entire puzzle!"
-                document.getElementById("bottom").append(d);
-                document.getElementById("inst").onclick = "rem()";
-                document.getElementById("inst").innerText = "Clear";
-            }
 
-            function rem() {
-                document.getElementById("instructions").remove();
-                document.getElementById("inst").onclick = "display()";
-                document.getElementById("inst").innerText = "Instructions";
-            }
-        </script>
-    </body>
+        <div class="checkbox-group">
+            <label for="mod"><input type="checkbox" id="mod" name="mod"> Modulo</label>
+            <br>
+            <label for="gcd"><input type="checkbox" id="gcd" name="gcd"> GCD</label>
+            <br>
+            <label for="lcm"><input type="checkbox" id="lcm" name="lcm"> LCM</label>
+            <br>
+            <label for="zero"><input type="checkbox" id="zero" name="zero"> Zero</label>
+            <br>
+            <label for="hidden"><input type="checkbox" id="hidden" name="hidden"> Hidden clues</label>
+        </div>
 
+        <button onclick="proceed()">Start</button>
+        <button onclick="display()" id="inst">Instructions</button>
 
+        <div id="bottom"></div>
+    </div>
+
+    <script>
+        function use_id() {
+            location.href = "puzzle.html?0|" + document.getElementById("unique_id").value;
+        }
+
+        function proceed() {
+            let s = "puzzle.html?" + document.getElementById("size").value + 
+            "|" + document.getElementById("diff").value;
+             
+            if (document.getElementById("mod").checked) s += "|1"; else s += "|0";
+            if (document.getElementById("gcd").checked) s += "|1"; else s += "|0";
+            if (document.getElementById("lcm").checked) s += "|1"; else s += "|0";
+            if (document.getElementById("zero").checked) s += "|1"; else s += "|0";
+            if (document.getElementById("hidden").checked) s += "|1"; else s += "|0";
+
+            location.href = s;
+        }
+
+        function display() {
+            let d = document.createElement("div");
+            d.style = "display:inline-block; text-align: left;";
+            d.id = "instructions"
+            d.innerHTML = `
+                <p>The objective of this game is to fill in the NxN square provided with the numbers 1-N.</p>
+                <p>There are a number of different operations, which can be seen below:</p>
+                <b>Addition (+):</b> The numbers in the cell must sum to the desired amount.<br>
+                <b>Subtraction (-):</b> The larger number in the cell minus the smaller number in the cell equals the desired amount.<br>
+                <b>Multiplication (x):</b> The numbers in the cell must multiply to the desired amount.<br>
+                <b>Division (/):</b> The larger number in the cell divided by the smaller number in the cell equals the desired amount.<br>
+                <h4>Special Operations/Modifications (optional):</h4>
+                <b>Modulo (%):</b> The remainder when the larger number is divided by the smaller number is the desired amount.<br>
+                <b>Greatest Common Divisor (gcd):</b> The largest number that divides all numbers in the cell.<br>
+                <b>Least Common Multiple (lcm):</b> The smallest number that is divisible by all numbers in the cell.<br>
+                <b>Zero:</b> Puzzle will include numbers from 0 -> N-1. Modulo, GCD, LCM, and Division clues will not include zero.<br>
+                <b>Hidden clues:</b> Solve for X, with or without solving the entire puzzle!
+            `;
+            document.getElementById("bottom").append(d);
+            document.getElementById("inst").onclick = rem;
+            document.getElementById("inst").innerText = "Clear";
+        }
+
+        function rem() {
+            document.getElementById("instructions").remove();
+            document.getElementById("inst").onclick = display;
+            document.getElementById("inst").innerText = "Instructions";
+        }
+    </script>
+</body>
 </html>
