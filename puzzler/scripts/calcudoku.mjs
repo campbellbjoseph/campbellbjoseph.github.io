@@ -1198,7 +1198,7 @@ function createFirework() {
     firework.style.left = `${positionX}px`;
     firework.style.top = `${positionY}px`;
     const randomHsl = () => `hsla(${Math.random() * 360}, 100%, 50%, 1)`
-    firework.style.backgroundColor = `background: radial-gradient(circle, ${randomHsl} 30%, rgba(255, 255, 255, 0) 60%)`
+    firework.style.background = `background: radial-gradient(circle, ${randomHsl} 30%, rgba(255, 255, 255, 0) 60%)`
 
     firework.style.animationDuration = `${Math.random() * 1 + 0.5}s`;
     firework.style.animationDelay = `${Math.random() * 2}s`;
