@@ -1180,7 +1180,7 @@ function startFireworks() {
     for (let i = 0; i < numberOfFireworks; i++) {
         createFirework();
     }
-    setTimeout(stopFireworks, 5000); // Stop fireworks after 5 seconds
+    setTimeout(stopFireworks, 10000); // Stop fireworks after 5 seconds
 }
 
 function createFirework() {
@@ -1197,13 +1197,15 @@ function createFirework() {
 
     firework.style.left = `${positionX}px`;
     firework.style.top = `${positionY}px`;
+    const randomHsl = () => `hsla(${Math.random() * 360}, 100%, 50%, 1)`
+    firework.style.backgroundColor = `background: radial-gradient(circle, ${randomHsl} 30%, rgba(255, 255, 255, 0) 60%)`
 
     firework.style.animationDuration = `${Math.random() * 1 + 0.5}s`;
     firework.style.animationDelay = `${Math.random() * 2}s`;
 
     setTimeout(() => {
         firework.remove();
-    }, 3000); // Remove firework after 3 seconds
+    }, 4000); // Remove firework after 3 seconds
 }
 
 function stopFireworks() {

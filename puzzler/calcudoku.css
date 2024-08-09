@@ -273,7 +273,6 @@ img {
 
 .firework {
     position: absolute;
-    background: radial-gradient(circle, #ff0 30%, rgba(255, 255, 255, 0) 60%);
     border-radius: 50%;
     opacity: 0;
     animation: explode 1s ease-out forwards, fadeOut 2s 1s forwards;
