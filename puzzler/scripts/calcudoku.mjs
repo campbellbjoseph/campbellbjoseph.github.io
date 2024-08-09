@@ -1159,7 +1159,7 @@ function displayWin() {
     document.getElementById("reset").removeEventListener("click", resetBoard);
     document.getElementById("reset").addEventListener("click", tryAgain);
     document.getElementById("undo").remove();
-
+    startFireworks()
     let re = document.createElement("div");
     re.classList.add("menu");
     re.style.backgroundColor = "blue"
@@ -1173,6 +1173,42 @@ function displayWin() {
     document.getElementById("buttons").append(re);
     document.getElementById("menu").append(b);
     
+}
+
+function startFireworks() {
+    const numberOfFireworks = 10;
+    for (let i = 0; i < numberOfFireworks; i++) {
+        createFirework();
+    }
+    setTimeout(stopFireworks, 5000); // Stop fireworks after 5 seconds
+}
+
+function createFirework() {
+    const firework = document.createElement('div');
+    firework.className = 'firework';
+    document.body.appendChild(firework);
+
+    const size = Math.random() * 50 + 50;
+    firework.style.width = `${size}px`;
+    firework.style.height = `${size}px`;
+
+    const positionX = Math.random() * (window.innerWidth - size);
+    const positionY = Math.random() * (window.innerHeight - size);
+
+    firework.style.left = `${positionX}px`;
+    firework.style.top = `${positionY}px`;
+
+    firework.style.animationDuration = `${Math.random() * 1 + 0.5}s`;
+    firework.style.animationDelay = `${Math.random() * 2}s`;
+
+    setTimeout(() => {
+        firework.remove();
+    }, 3000); // Remove firework after 3 seconds
+}
+
+function stopFireworks() {
+    const fireworks = document.querySelectorAll('.firework');
+    fireworks.forEach(firework => firework.remove());
 }
 
 function tryAgain() {
