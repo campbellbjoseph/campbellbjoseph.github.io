@@ -1178,7 +1178,6 @@ function displayWin() {
 function startFireworks() {
     const numberOfFireworks = 500;
     for (let i = 0; i < numberOfFireworks; i++) {
-        console.log("creating")
         createFirework();
     }
     setTimeout(stopFireworks, 10000); // Stop fireworks after 5 seconds
