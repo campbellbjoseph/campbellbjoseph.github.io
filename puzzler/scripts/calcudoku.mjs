@@ -106,7 +106,7 @@ function decipher(query) {
     }
     
     var p = precompute(n, cc, cov, zero_allowed);
-    var grid = do_outputs(n, cc, cov, p, zero_allowed);
+    var grid = do_outputs(n, cc, cov, p, zero_allowed, generated=false);
     return [grid, cg, cc, cov]
 }
 
@@ -343,6 +343,7 @@ function setGame() {
         cage_grid = out[1];
         cage_cells = out[2];
         cage_operators_values = out[3];
+        console.log(out)
     }
     
     solution = grid;
