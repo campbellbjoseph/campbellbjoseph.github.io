@@ -5,8 +5,9 @@ let nameToNumberMap = {};
 let numberToNameMap = {};
 let originalWorkbook = null;
 let currentFile = null;
+let captainAssignments = {}; // Track captain assignments: {weekIndex: {courtIndex: captainName}}
 
-function processData() {
+async function processData() {
     // Clear previous errors
     clearErrors();
     
@@ -17,42 +18,45 @@ function processData() {
     if (namesInput) {
         playerNames = namesInput.split(',').map(name => name.trim()).filter(name => name);
     } else if (currentFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                originalWorkbook = XLSX.read(data, { type: 'array' });
-                
-                // Get the first worksheet
-                const firstSheet = originalWorkbook.Sheets[originalWorkbook.SheetNames[0]];
-                
-                // Convert to JSON and extract names from first column
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                
-                // Extract names from first column, filtering out empty cells
-                playerNames = jsonData
-                    .map(row => row[0]) // Get first column
-                    .filter(name => name && typeof name === 'string') // Filter out empty cells and non-strings
-                    .map(name => name.trim()) // Trim whitespace
-                    .filter(name => name); // Filter out empty strings after trimming
-                
-                if (playerNames.length === 0) {
-                    showError('file-error', 'No valid names found in the Excel file. Please ensure names are in the first column.');
-                    return;
-                }
-                
-                continueProcessing();
-            } catch (error) {
-                console.error('Error processing Excel file:', error);
-                showError('file-error', 'Error processing Excel file. Please ensure it\'s a valid Excel file with names in the first column.');
-                updateFileDisplay(null); // Clear the file display on error
+        try {
+            const arrayBuffer = await readFileAsArrayBuffer(currentFile);
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(arrayBuffer);
+            
+            // Store the original workbook for later use
+            originalWorkbook = workbook;
+            
+            // Get the first worksheet
+            const firstWorksheet = workbook.worksheets[0];
+            
+            if (!firstWorksheet) {
+                showError('file-error', 'No worksheets found in the Excel file.');
+                return;
             }
-        };
-        reader.onerror = function() {
-            showError('file-error', 'Error reading the file. Please try again.');
+            
+            // Extract names from first column, filtering out empty cells
+            playerNames = [];
+            firstWorksheet.eachRow((row, rowNumber) => {
+                const firstCell = row.getCell(1);
+                if (firstCell.value && typeof firstCell.value === 'string') {
+                    const name = firstCell.value.trim();
+                    if (name) {
+                        playerNames.push(name);
+                    }
+                }
+            });
+            
+            if (playerNames.length === 0) {
+                showError('file-error', 'No valid names found in the Excel file. Please ensure names are in the first column.');
+                return;
+            }
+            
+            continueProcessing();
+        } catch (error) {
+            console.error('Error processing Excel file:', error);
+            showError('file-error', 'Error processing Excel file. Please ensure it\'s a valid Excel file with names in the first column.');
             updateFileDisplay(null); // Clear the file display on error
-        };
-        reader.readAsArrayBuffer(currentFile);
+        }
         return;
     } else {
         showError('names-error', 'Please enter names or upload a file');
@@ -60,6 +64,19 @@ function processData() {
     }
     
     continueProcessing();
+}
+
+function readFileAsArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            resolve(e.target.result);
+        };
+        reader.onerror = function() {
+            reject(new Error('Error reading the file. Please try again.'));
+        };
+        reader.readAsArrayBuffer(file);
+    });
 }
 
 function continueProcessing() {
@@ -290,7 +307,61 @@ function parseAndGenerateSchedule(csvContent) {
     return schedule;
 }
 
+function assignCaptains(schedule) {
+    // Initialize captain count for each player
+    const captainCount = {};
+    playerNames.forEach(name => captainCount[name] = 0);
+    
+    // Reset captain assignments
+    captainAssignments = {};
+    
+    // Create a list of all court slots that need captains
+    const courtSlots = [];
+    for (let weekIndex = 0; weekIndex < schedule.length; weekIndex++) {
+        const week = schedule[weekIndex];
+        for (let courtIndex = 0; courtIndex < week.matches.length; courtIndex++) {
+            courtSlots.push({
+                weekIndex,
+                courtIndex,
+                players: week.matches[courtIndex]
+            });
+        }
+    }
+    
+    // Assign captains to ensure fair distribution
+    for (const slot of courtSlots) {
+        const { weekIndex, courtIndex, players } = slot;
+        
+        if (!captainAssignments[weekIndex]) {
+            captainAssignments[weekIndex] = {};
+        }
+        
+        // Find the player with the lowest captain count among the 4 players on this court
+        let selectedCaptain = null;
+        let minCount = Infinity;
+        
+        for (const player of players) {
+            if (captainCount[player] < minCount) {
+                minCount = captainCount[player];
+                selectedCaptain = player;
+            }
+        }
+        
+        // If multiple players have the same low count, pick the first one
+        if (selectedCaptain) {
+            captainAssignments[weekIndex][courtIndex] = selectedCaptain;
+            captainCount[selectedCaptain]++;
+        }
+    }
+    
+    console.log('Captain assignments:', captainAssignments);
+    console.log('Final captain counts:', captainCount);
+}
+
 function displaySchedule(schedule) {
+    // Assign captains before displaying
+    assignCaptains(schedule);
+    
     let html = '<h3>🎾 Generated Schedule</h3>';
     
     // Add download button at the top
@@ -298,14 +369,22 @@ function displaySchedule(schedule) {
     html += '<button class="btn download-btn" onclick="downloadExcel()">📊 Download Excel File</button>';
     html += '</div>';
     
-    for (const week of schedule) {
+    for (let weekIndex = 0; weekIndex < schedule.length; weekIndex++) {
+        const week = schedule[weekIndex];
         html += `<div class="week-section">`;
         html += `<h4>${week.week}</h4>`;
         
-        for (let i = 0; i < week.matches.length; i++) {
-            const match = week.matches[i];
+        for (let courtIndex = 0; courtIndex < week.matches.length; courtIndex++) {
+            const match = week.matches[courtIndex];
+            const captain = captainAssignments[weekIndex][courtIndex];
+            
+            // Format player names with captain in bold
+            const formattedPlayers = match.map(player => 
+                player === captain ? `<strong>${player}</strong>` : player
+            );
+            
             html += `<div class="match">`;
-            html += `<strong>Court ${i + 1}:</strong> ${match.join(' vs ')}`;
+            html += `<strong>Court ${courtIndex + 1}:</strong> ${formattedPlayers.join(', ')}`;
             html += `</div>`;
         }
         
@@ -328,93 +407,98 @@ function clearErrors() {
     errorElements.forEach(element => element.textContent = '');
 }
 
-function downloadExcel() {
+async function downloadExcel() {
     if (!window.currentSchedule) {
         alert('No schedule data available. Please generate a schedule first.');
         return;
     }
     
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    
-    // If we have the original workbook, copy its first sheet
-    if (originalWorkbook) {
-        const originalSheetName = originalWorkbook.SheetNames[0];
-        const originalSheet = originalWorkbook.Sheets[originalSheetName];
+    try {
+        // Create workbook
+        const workbook = new ExcelJS.Workbook();
         
-        // Create a new sheet with the same name and data
-        const newSheet = XLSX.utils.aoa_to_sheet(XLSX.utils.sheet_to_json(originalSheet, { header: 1 }));
-        XLSX.utils.book_append_sheet(wb, newSheet, originalSheetName);
+        // Set workbook properties
+        workbook.creator = 'RallyReady';
+        workbook.lastModifiedBy = 'RallyReady';
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        
+        // If we have the original workbook, copy its first sheet
+        if (originalWorkbook && originalWorkbook.worksheets.length > 0) {
+            const originalSheet = originalWorkbook.worksheets[0];
+            const newSheet = workbook.addWorksheet(originalSheet.name || 'Players');
+            
+            // Copy data from original sheet
+            originalSheet.eachRow((row, rowNumber) => {
+                const newRow = newSheet.getRow(rowNumber);
+                row.eachCell((cell, colNumber) => {
+                    newRow.getCell(colNumber).value = cell.value;
+                });
+            });
+        }
+        
+        // Create Schedule worksheet
+        await createScheduleSheet(workbook);
+        
+        // Create Scores worksheet
+        await createScoresSheet(workbook);
+        
+        // Create Results worksheet
+        await createResultsSheet(workbook);
+        
+        // Generate filename with timestamp
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+        const filename = `Tennis_Schedule_${timestamp}.xlsx`;
+        
+        // Download the file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error creating Excel file:', error);
+        alert('Error creating Excel file. Please try again.');
     }
-    
-    // Create Schedule worksheet
-    const scheduleData = createScheduleSheet();
-    const scheduleWs = XLSX.utils.aoa_to_sheet(scheduleData);
-    
-    // Set column widths dynamically based on number of courts
-    const scheduleCols = [{ width: 12 }]; // Week column
-    for (let i = 0; i < courtsPerWeek; i++) {
-        scheduleCols.push({ width: 35 }); // Court columns (wider to fit all 4 players)
-    }
-    scheduleCols.push({ width: 30 }); // Not Playing column
-    scheduleWs['!cols'] = scheduleCols;
-    XLSX.utils.book_append_sheet(wb, scheduleWs, 'Schedule');
-    
-    // Create Scores worksheet
-    const scoresData = createScoresSheet();
-    const scoresWs = XLSX.utils.aoa_to_sheet(scoresData);
-    scoresWs['!cols'] = [
-        { width: 20 }, // Team 1
-        { width: 20 }, // Team 2
-        { width: 15 }, // Team 1 Score
-        { width: 15 }  // Team 2 Score
-    ];
-    XLSX.utils.book_append_sheet(wb, scoresWs, 'Scores');
-    
-    // Create Results worksheet
-    const resultsData = createResultsSheet();
-    const resultsWs = XLSX.utils.aoa_to_sheet(resultsData);
-    
-    // Set column widths for Results sheet
-    const resultsCols = [{ width: 15 }]; // Players column
-    for (let i = 0; i < numWeeks; i++) {
-        resultsCols.push({ width: 12 }); // Week columns
-    }
-    resultsCols.push({ width: 15 }); // Total points column
-    resultsWs['!cols'] = resultsCols;
-    
-    XLSX.utils.book_append_sheet(wb, resultsWs, 'Results');
-    
-    // Generate filename with timestamp
-    const now = new Date();
-    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const filename = `Tennis_Schedule_${timestamp}.xlsx`;
-    
-    // Download the file
-    XLSX.writeFile(wb, filename);
 }
 
-function createScheduleSheet() {
-    const data = [];
+async function createScheduleSheet(workbook) {
+    const worksheet = workbook.addWorksheet('Schedule');
     
-    data.push([`Total Players: ${playerNames.length}`]);
-    data.push([`Weeks: ${numWeeks}`]);
-    data.push([`Courts per week: ${courtsPerWeek}`]);
-    data.push(['']); // Empty row
+    // Add header information
+    worksheet.getCell('A1').value = `Total Players: ${playerNames.length}`;
+    worksheet.getCell('A2').value = `Weeks: ${numWeeks}`;
+    worksheet.getCell('A3').value = `Courts per week: ${courtsPerWeek}`;
     
     // Create column headers
-    const headers = ['Week'];
+    const headerRow = worksheet.getRow(5);
+    headerRow.getCell(1).value = 'Week';
     for (let i = 1; i <= courtsPerWeek; i++) {
-        headers.push(`Court ${i}`);
+        headerRow.getCell(i + 1).value = `Court ${i}`;
     }
-    headers.push('Not Playing');
-    data.push(headers);
+    headerRow.getCell(courtsPerWeek + 2).value = 'Not Playing';
+    
+    // Style the header row
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+    };
     
     // Add schedule data by week
     for (let weekIndex = 0; weekIndex < window.currentSchedule.length; weekIndex++) {
         const week = window.currentSchedule[weekIndex];
+        const row = worksheet.getRow(weekIndex + 6);
         
-        const row = [`Week ${weekIndex + 1}`];
+        row.getCell(1).value = `Week ${weekIndex + 1}`;
         
         // Collect all players playing this week
         const playersThisWeek = new Set();
@@ -422,7 +506,26 @@ function createScheduleSheet() {
         // Add each court's players as comma-separated values
         for (let courtIndex = 0; courtIndex < week.matches.length; courtIndex++) {
             const match = week.matches[courtIndex];
-            row.push(match.join(', '));
+            const captain = captainAssignments[weekIndex] ? captainAssignments[weekIndex][courtIndex] : null;
+            
+            // Create rich text with captain in bold
+            if (captain) {
+                const richText = [];
+                for (let i = 0; i < match.length; i++) {
+                    const player = match[i];
+                    if (i > 0) {
+                        richText.push({ text: ', ' });
+                    }
+                    if (player === captain) {
+                        richText.push({ text: player, font: { bold: true } });
+                    } else {
+                        richText.push({ text: player });
+                    }
+                }
+                row.getCell(courtIndex + 2).value = { richText: richText };
+            } else {
+                row.getCell(courtIndex + 2).value = match.join(', ');
+            }
             
             // Add players to the set of players playing this week
             match.forEach(player => playersThisWeek.add(player));
@@ -430,30 +533,50 @@ function createScheduleSheet() {
         
         // Find players not playing this week
         const notPlaying = playerNames.filter(player => !playersThisWeek.has(player));
-        row.push(notPlaying.join(', '));
-        
-        data.push(row);
+        row.getCell(courtsPerWeek + 2).value = notPlaying.join(', ');
     }
-    data.push([])
-    data.push(["The following schedules are generated by a computer algorithm to ensure fairness."]);
-    data.push(["All players play an equal number of matches, and courts are assigned in such a way as to minimize the number of times players play against the same opponent."]);
-    data.push(["Note that making use of substitutes will alter the balance of the schedule, so please keep that in mind."]);
-    data.push(["Generated by RallyReady, visit https://campbellbjoseph.com/scheduling for more details."]);
     
-    return data;
+    // Add footer information
+    const footerStartRow = window.currentSchedule.length + 7;
+    worksheet.getCell(`A${footerStartRow}`).value = "The following schedules are generated by a computer algorithm to ensure fairness.";
+    worksheet.getCell(`A${footerStartRow + 1}`).value = "All players play an equal number of matches, and courts are assigned in such a way as to minimize the number of times players play against the same opponent.";
+    worksheet.getCell(`A${footerStartRow + 2}`).value = "Captains are automatically assigned (shown in bold) to ensure each player serves as captain an equal number of times.";
+    worksheet.getCell(`A${footerStartRow + 3}`).value = "Note that making use of substitutes will alter the balance of the schedule, so please keep that in mind.";
+    worksheet.getCell(`A${footerStartRow + 4}`).value = "Generated by RallyReady, visit https://campbellbjoseph.com/scheduling for more details.";
+    
+    // Set column widths
+    worksheet.getColumn(1).width = 12; // Week column
+    for (let i = 2; i <= courtsPerWeek + 1; i++) {
+        worksheet.getColumn(i).width = 35; // Court columns
+    }
+    worksheet.getColumn(courtsPerWeek + 2).width = 30; // Not Playing column
 }
 
-
-
-function createScoresSheet() {
-    const data = [];
+async function createScoresSheet(workbook) {
+    const worksheet = workbook.addWorksheet('Scores');
+    
+    let currentRow = 1;
     
     for (let weekIndex = 0; weekIndex < window.currentSchedule.length; weekIndex++) {
         const week = window.currentSchedule[weekIndex];
         
-        // Week header
-        let formula = `Schedule!A${weekIndex + 6}`;
-        data.push([{ f: formula }, 'Team 1', 'Team 2', 'Team 1 Score', 'Team 2 Score']);
+        // Week header with formula reference to Schedule sheet
+        const headerRow = worksheet.getRow(currentRow);
+        headerRow.getCell(1).value = { formula: `Schedule!A${weekIndex + 6}` };
+        headerRow.getCell(2).value = 'Team 1';
+        headerRow.getCell(3).value = 'Team 2';
+        headerRow.getCell(4).value = 'Team 1 Score';
+        headerRow.getCell(5).value = 'Team 2 Score';
+        
+        // Style header row
+        headerRow.font = { bold: true };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF0F0F0' }
+        };
+        
+        currentRow++;
         
         for (let courtIndex = 0; courtIndex < week.matches.length; courtIndex++) {
             const match = week.matches[courtIndex];
@@ -463,25 +586,31 @@ function createScoresSheet() {
             
             for (let subMatchIndex = 0; subMatchIndex < subMatches.length; subMatchIndex++) {
                 const subMatch = subMatches[subMatchIndex];
+                const row = worksheet.getRow(currentRow);
                 
                 // Put "Court X:" on the same row as the first submatch
                 const courtLabel = subMatchIndex === 0 ? `Court ${courtIndex + 1}:` : '';
                 
-                data.push([
-                    courtLabel,
-                    subMatch.team1,
-                    subMatch.team2,
-                    '', // Empty score cell for Team 1
-                    ''  // Empty score cell for Team 2
-                ]);
+                row.getCell(1).value = courtLabel;
+                row.getCell(2).value = subMatch.team1;
+                row.getCell(3).value = subMatch.team2;
+                row.getCell(4).value = ''; // Empty score cell for Team 1
+                row.getCell(5).value = ''; // Empty score cell for Team 2
+                
+                currentRow++;
             }
         }
         
         // Empty row between weeks
-        data.push(['']);
+        currentRow++;
     }
     
-    return data;
+    // Set column widths
+    worksheet.getColumn(1).width = 15;
+    worksheet.getColumn(2).width = 20;
+    worksheet.getColumn(3).width = 20;
+    worksheet.getColumn(4).width = 15;
+    worksheet.getColumn(5).width = 15;
 }
 
 function generateSubMatches(players) {
@@ -505,47 +634,59 @@ function generateSubMatches(players) {
     ];
 }
 
-function createResultsSheet() {
-    const data = [];
+async function createResultsSheet(workbook) {
+    const worksheet = workbook.addWorksheet('Results');
     
     // Header row
-    const headers = ['Players'];
+    const headerRow = worksheet.getRow(1);
+    headerRow.getCell(1).value = 'Players';
     for (let i = 1; i <= numWeeks; i++) {
-        let formula = `Schedule!A${i + 5}`;
-        headers.push({ f: formula });
+        headerRow.getCell(i + 1).value = { formula: `Schedule!A${i + 5}` };
     }
-    headers.push('Total points');
-    data.push(headers);
+    headerRow.getCell(numWeeks + 2).value = 'Total points';
+    
+    // Style header row
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+    };
     
     // Add each player with formulas
     for (let playerIndex = 0; playerIndex < playerNames.length; playerIndex++) {
         const playerName = playerNames[playerIndex];
-        const row = [playerName];
+        const row = worksheet.getRow(playerIndex + 2);
         
-        // Add week formulas - for now, just put 0 and let users add their own formulas
+        row.getCell(1).value = playerName;
+        
+        // Add week formulas
         for (let weekNum = 1; weekNum <= numWeeks; weekNum++) {
-            // Put 0 as placeholder - users can create their own SUMIF formulas
-            // Example formula they can use: =SUMIF(Scores.B:C,"*PlayerName*",Scores.C:C>Scores.D:D)
-            let r = playerIndex + 2;
-            let st = 2 + (3*courtsPerWeek + 2) * (weekNum - 1);
-            let end = st + 3*courtsPerWeek - 1;
-            let formula = `SUMIF(Scores!$B${st}:$B${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$D${st}:$D${end}) + SUMIF(Scores!$C${st}:$C${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$E${st}:$E${end})`
-            row.push({ f: formula });
+            const r = playerIndex + 2;
+            const st = 2 + (3 * courtsPerWeek + 2) * (weekNum - 1);
+            const end = st + 3 * courtsPerWeek - 1;
+            const formula = `SUMIF(Scores!$B${st}:$B${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$D${st}:$D${end}) + SUMIF(Scores!$C${st}:$C${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$E${st}:$E${end})`;
+            row.getCell(weekNum + 1).value = { formula: formula };
         }
         
         // Total points formula (sum of all week columns for this row)
-        const startCol = String.fromCharCode(66); // Column B
+        const startCol = 'B';
         const endCol = String.fromCharCode(66 + numWeeks - 1); // Last week column
-        const rowNum = playerIndex + 2; // +2 because of header row and 1-indexed
+        const rowNum = playerIndex + 2;
         const totalFormula = `SUM(${startCol}${rowNum}:${endCol}${rowNum})`;
-        row.push({ f: totalFormula });
-        
-        data.push(row);
+        row.getCell(numWeeks + 2).value = { formula: totalFormula };
     }
-    data.push([])
-    data.push(["If the formulas are not working, it is likely that two players have the same name or one's player name is a substring of another's player name (e.g. 'Beth and Bethany'). Please make the names unique and reload the scheduling, or fix the formulas manually."]);
     
-    return data;
+    // Add footer note
+    const footerRow = worksheet.getRow(playerNames.length + 3);
+    footerRow.getCell(1).value = "If the formulas are not working, it is likely that two players have the same name or one's player name is a substring of another's player name (e.g. 'Beth and Bethany'). Please make the names unique and reload the scheduling, or fix the formulas manually.";
+    
+    // Set column widths
+    worksheet.getColumn(1).width = 15; // Players column
+    for (let i = 2; i <= numWeeks + 1; i++) {
+        worksheet.getColumn(i).width = 12; // Week columns
+    }
+    worksheet.getColumn(numWeeks + 2).width = 15; // Total points column
 }
 
 function updateFileDisplay(file) {
