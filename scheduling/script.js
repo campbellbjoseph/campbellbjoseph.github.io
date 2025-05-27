@@ -39,6 +39,7 @@ function continueProcessing() {
     
     // Validate inputs
     if (!validateInputs()) {
+        console.log("not valid");
         return;
     }
     
@@ -73,6 +74,14 @@ function validateInputs() {
         showError('courts-error', 'Please enter a valid number of courts');
         isValid = false;
     }
+    let n = playerNames.length;
+    let k = 4 * courtsPerWeek;
+    let w = numWeeks;
+    if ((k * w) % n != 0) {
+        alert("Error: impossible to schedule given those parameters, please ensure that 4 x courtsPerWeek x numWeeks is divisible by the number of players.");
+        isValid = false;
+    }
+
     
     return isValid;
 }
@@ -192,17 +201,6 @@ function displaySchedule(schedule) {
     html += '<button class="btn download-btn" onclick="downloadExcel()">📊 Download Excel File</button>';
     html += '</div>';
     
-    // Add mapping information
-    html += '<div class="mapping-section">';
-    html += '<h4>🔀 Player Number Mapping</h4>';
-    html += '<div class="mapping-grid">';
-    
-    for (const [name, number] of Object.entries(nameToNumberMap)) {
-        html += `<div class="mapping-item">${name} → ${number}</div>`;
-    }
-    
-    html += '</div>';
-    html += '</div>';
     
     document.getElementById('schedule-output').innerHTML = html;
     document.getElementById('schedule-output').style.display = 'block';
