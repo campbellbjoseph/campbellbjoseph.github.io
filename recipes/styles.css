@@ -1,0 +1,333 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 600px;
+}
+
+.input-section {
+    padding: 30px;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+}
+
+.results-section {
+    padding: 30px;
+    background: white;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.ingredient-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.ingredient-select {
+    flex: 2;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+}
+
+.ingredient-select optgroup {
+    font-weight: bold;
+    color: #2c3e50;
+    background-color: #f8f9fa;
+    padding: 4px 0;
+    font-size: 14px;
+}
+
+.ingredient-select option {
+    font-weight: normal;
+    color: #495057;
+    padding: 4px 8px;
+}
+
+.ingredient-amount {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.serving-size-display {
+    flex-basis: 100%;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 5px;
+    border-left: 3px solid #2196f3;
+}
+
+.remove-btn {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background: #ff3742;
+}
+
+.add-ingredient-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+}
+
+.add-ingredient-btn:hover {
+    background: #45a049;
+}
+
+.analyze-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    width: 100%;
+    transition: transform 0.3s;
+}
+
+.analyze-btn:hover {
+    transform: translateY(-2px);
+}
+
+.results {
+    display: none;
+}
+
+.results.show {
+    display: block;
+}
+
+.nutrition-category {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.nutrition-category h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.3em;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+}
+
+.nutrient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.nutrient-item {
+    padding: 10px;
+    border-radius: 6px;
+    background: white;
+    border-left: 4px solid #ddd;
+    transition: border-color 0.3s;
+}
+
+.nutrient-item.sufficient {
+    border-left-color: #4CAF50;
+    background: #f1f8e9;
+}
+
+.nutrient-item.insufficient {
+    border-left-color: #ff9800;
+    background: #fff8e1;
+}
+
+.nutrient-item.macronutrient {
+    border-left-color: #9c27b0;
+    background: #f3e5f5;
+    font-weight: 500;
+}
+
+.nutrient-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.nutrient-amount {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.summary {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.summary h3 {
+    color: #1976d2;
+    margin-bottom: 10px;
+}
+
+.recommendations {
+    margin-top: 20px;
+}
+
+.recommendations h4 {
+    color: #1976d2;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.recommendation-section {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.recommendation-section.high-priority {
+    background: #ffebee;
+    border-left-color: #f44336;
+}
+
+.recommendation-section.medium-priority {
+    background: #fff8e1;
+    border-left-color: #ff9800;
+}
+
+.recommendation-section.good-balance {
+    background: #e8f5e8;
+    border-left-color: #4caf50;
+}
+
+.recommendation-section h5 {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.recommendation-section p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .input-section {
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .ingredient-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .ingredient-select,
+    .ingredient-amount {
+        flex: none;
+        margin-bottom: 8px;
+    }
+    
+    .serving-size-display {
+        flex-basis: auto;
+        margin-top: 0;
+    }
+} 
