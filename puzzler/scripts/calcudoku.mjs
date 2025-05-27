@@ -188,7 +188,7 @@ export function puzzle_id(cage_grid, cage_operators_values, diff, spec) {
     return ans;
 }
 
-export function do_outputs(m, cc, cov, p, z) {
+export function do_outputs(m, cc, cov, p, z, generated=true) {
     //console.log("--------------------------");
     let initial_array = zero2D(m);
     //console.log(initial_array);
@@ -286,7 +286,7 @@ function setGame() {
         //console.log(out)
         //console.log(need_special)
         //console.log(need_special > 0 && at_least_one_special == false)
-        let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed, generated);
         //console.log(p)
         console.log(s)
         let z = null;
@@ -320,7 +320,7 @@ function setGame() {
             cage_operators_values = out[3];
             at_least_one_special = out[4];
             p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
-            s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+            s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed, generated);
             if (hidden_clues == 1) {
                 for (let id in cage_cells) {
                     let cells = cage_cells[id];
@@ -1546,9 +1546,9 @@ function generatePuzzleOfTheDay() {
 export function generate_daily_puzzle() {
     let x = generatePuzzleOfTheDay(); // 0 <= x < 1000
     console.log(x)
-    var n = (x % 3) + 6;
+    var n = ((x+1) % 3) + 6;
     let diff = Math.floor(Math.random() * 3);
-    let hidden = (x % 5 == 0);
+    let hidden = ((x+1) % 5 == 0);
     var hidden_clues = 0;
     var need_special = 0;
     if (hidden) {
@@ -1568,7 +1568,7 @@ export function generate_daily_puzzle() {
     var lcm = special[2];
     var zero_allowed = special[3];
     
-    let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+    let s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed, true);
     console.log(s)
     let z = null;
     if (hidden_clues == 1) {
@@ -1584,11 +1584,11 @@ export function generate_daily_puzzle() {
     }
     let att = 1;
     while ((s != 1 || (need_special > 0 && at_least_one_special == false)) || (hidden_clues == 1 && z == false)) {
-        if (att >= 3){
+        if (att >= 100){
             break;
         }
         if (s != 1) {
-            console.log("Attempt " + att.toString() + ": Failed due to multiple solutions")
+            console.log("Attempt " + att.toString() + ": Failed due to multiple solutions - " + s.toString())
         } else if ((need_special > 0 && at_least_one_special == false)) {
             console.log("Attempt " + att.toString() + ": Failed due to lack of special")
         } else {
@@ -1603,7 +1603,7 @@ export function generate_daily_puzzle() {
         cage_operators_values = out[3];
         at_least_one_special = out[4];
         p = precompute(n, cage_cells, cage_operators_values, zero_allowed);
-        s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed);
+        s = do_outputs(n, cage_cells, cage_operators_values, p, zero_allowed, true);
         if (hidden_clues == 1) {
             for (let id in cage_cells) {
                 let cells = cage_cells[id];
