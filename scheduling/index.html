@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduling Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Scheduling Tool</h1>
+            <p>Organize your tournament or league matches</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="input-group">
+                <label for="names-input">Player Names (comma-separated)</label>
+                <textarea 
+                    id="names-input" 
+                    placeholder="Enter player names separated by commas, e.g., John, Mary, David, Sarah..."
+                ></textarea>
+                <div class="error" id="names-error"></div>
+            </div>
+
+            <div class="input-group">
+                <label>Or Upload Names from File</label>
+                <div class="file-upload" id="file-upload">
+                    <input type="file" id="file-input" accept=".txt">
+                    <label for="file-input" class="file-upload-label">
+                        📁 Click to upload a .txt file with names (comma-separated)
+                    </label>
+                </div>
+                <div class="error" id="file-error"></div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="weeks-input">Number of Weeks</label>
+                    <input 
+                        type="number" 
+                        id="weeks-input" 
+                        min="1" 
+                        placeholder="e.g., 5"
+                    >
+                    <div class="error" id="weeks-error"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="courts-input">Courts playing each week</label>
+                    <input 
+                        type="number" 
+                        id="courts-input" 
+                        min="1" 
+                        placeholder="e.g., 2"
+                    >
+                    <div class="error" id="courts-error"></div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="processData()">🚀 Process Schedule Data</button>
+
+            <div class="result-container" id="result-container">
+                <h3>📊 Processed Data</h3>
+                <div class="name-count" id="name-count"></div>
+                <div class="name-list" id="name-list"></div>
+                <div id="schedule-params"></div>
+                <button class="btn" onclick="generateSchedule()" id="generate-btn" style="display: none; margin-top: 20px;">🎾 Generate Schedule</button>
+                <div id="schedule-output" style="display: none; margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
