@@ -110,6 +110,9 @@
         <h1>Welcome to SuperCalc!</h1>
         <a href="../index.html">Return to home page</a>
         <hr>
+        <button onclick="daily()">Try the Puzzle of the Day!</button>
+        <br>
+        <br>
         <label for="uid">Paste unique puzzle ID:</label>
         <input type="text" id="unique_id">
         <button onclick="use_id()">Go</button>
@@ -140,6 +143,9 @@
     </div>
 
     <script>
+        function daily() {
+            location.href = "puzzle.html?1|0|0|0|0|0|0";
+        }
         function use_id() {
             location.href = "puzzle.html?0|" + document.getElementById("unique_id").value;
         }
