@@ -131,9 +131,24 @@ function validateInputs() {
         isValid = false;
     }
 
+    if (numWeeks > 16) {
+        showError('weeks-error', 'Please enter a valid number of weeks. There are at most 16 weeks in a season.');
+        isValid = false;
+    }
+
+    if (playerNames.length > 50) {
+        showError('weeks-error', 'Please enter a valid number of players. There are at most 50 players possible.');
+        isValid = false;
+    }
+
     let n = playerNames.length;
     let k = 4 * courtsPerWeek;
     let w = numWeeks;
+
+    if (k > n) {
+        showError('courts-error', `Please enter a valid number of courts. There are only ${n} players.`);
+        isValid = false;
+    }
     
     if ((k * w) % n != 0) {
         const validCombinations = findValidCombinations(n, courtsPerWeek, numWeeks);
