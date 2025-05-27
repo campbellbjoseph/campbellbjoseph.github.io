@@ -3,6 +3,8 @@ let numWeeks = 0;
 let courtsPerWeek = 0;
 let nameToNumberMap = {};
 let numberToNameMap = {};
+let originalWorkbook = null;
+let currentFile = null;
 
 function processData() {
     // Clear previous errors
@@ -14,15 +16,43 @@ function processData() {
     
     if (namesInput) {
         playerNames = namesInput.split(',').map(name => name.trim()).filter(name => name);
-    } else if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
+    } else if (currentFile) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const content = e.target.result;
-            playerNames = content.split(',').map(name => name.trim()).filter(name => name);
-            continueProcessing();
+            try {
+                const data = new Uint8Array(e.target.result);
+                originalWorkbook = XLSX.read(data, { type: 'array' });
+                
+                // Get the first worksheet
+                const firstSheet = originalWorkbook.Sheets[originalWorkbook.SheetNames[0]];
+                
+                // Convert to JSON and extract names from first column
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                // Extract names from first column, filtering out empty cells
+                playerNames = jsonData
+                    .map(row => row[0]) // Get first column
+                    .filter(name => name && typeof name === 'string') // Filter out empty cells and non-strings
+                    .map(name => name.trim()) // Trim whitespace
+                    .filter(name => name); // Filter out empty strings after trimming
+                
+                if (playerNames.length === 0) {
+                    showError('file-error', 'No valid names found in the Excel file. Please ensure names are in the first column.');
+                    return;
+                }
+                
+                continueProcessing();
+            } catch (error) {
+                console.error('Error processing Excel file:', error);
+                showError('file-error', 'Error processing Excel file. Please ensure it\'s a valid Excel file with names in the first column.');
+                updateFileDisplay(null); // Clear the file display on error
+            }
         };
-        reader.readAsText(file);
+        reader.onerror = function() {
+            showError('file-error', 'Error reading the file. Please try again.');
+            updateFileDisplay(null); // Clear the file display on error
+        };
+        reader.readAsArrayBuffer(currentFile);
         return;
     } else {
         showError('names-error', 'Please enter names or upload a file');
@@ -57,6 +87,32 @@ function continueProcessing() {
     document.getElementById('generate-btn').style.display = 'block';
 }
 
+function findValidCombinations(n, desiredCourts, desiredWeeks) {
+    const combinations = [];
+    // We'll look for combinations up to n/4 courts and 16 weeks
+    for (let courts = 1; courts <= n/4; courts++) {
+        for (let weeks = 1; weeks <= 16; weeks++) {
+            if ((4 * courts * weeks) % n === 0) {
+                // Calculate how far this combination is from the desired values
+                // We use a weighted score where courts and weeks are equally important
+                const courtsDiff = Math.abs(courts - desiredCourts);
+                const weeksDiff = Math.abs(weeks - desiredWeeks);
+                const distanceScore = courtsDiff + weeksDiff;
+                
+                combinations.push({ 
+                    courts, 
+                    weeks,
+                    distanceScore,
+                    playersPerWeek: 4 * courts
+                });
+            }
+        }
+    }
+    
+    // Sort by distance score (closest to desired values first)
+    return combinations.sort((a, b) => a.distanceScore - b.distanceScore);
+}
+
 function validateInputs() {
     let isValid = true;
     
@@ -74,14 +130,55 @@ function validateInputs() {
         showError('courts-error', 'Please enter a valid number of courts');
         isValid = false;
     }
+
     let n = playerNames.length;
     let k = 4 * courtsPerWeek;
     let w = numWeeks;
+    
     if ((k * w) % n != 0) {
-        alert("Error: impossible to schedule given those parameters, please ensure that 4 x courtsPerWeek x numWeeks is divisible by the number of players.");
+        const validCombinations = findValidCombinations(n, courtsPerWeek, numWeeks);
+        let suggestionsHtml = '<div class="suggestions">';
+        suggestionsHtml += `<p>Invalid combination. Here are the closest valid options to ensure everyone plays an equal number of matches (assuming you wish to have ${n} players):</p>`;
+        suggestionsHtml += '<table class="suggestions-table">';
+        suggestionsHtml += '<tr><th>Number of Weeks</th><th>Courts per Week</th></tr>';
+        
+        // Show up to 5 suggestions, sorted by distance from input
+        const suggestions = validCombinations.slice(0, 5);
+        
+        for (const combo of suggestions) {
+            const courtsDiff = Math.abs(combo.courts - courtsPerWeek);
+            const weeksDiff = Math.abs(combo.weeks - numWeeks);
+            const diffText = courtsDiff + weeksDiff === 0 ? 'Exact match' : 
+                           `${courtsDiff} court${courtsDiff !== 1 ? 's' : ''}, ${weeksDiff} week${weeksDiff !== 1 ? 's' : ''}`;
+            
+            suggestionsHtml += `<tr>
+                <td>${combo.weeks}</td>
+                <td>${combo.courts}</td>
+            </tr>`;
+        }
+        
+        suggestionsHtml += '</table>';
+        suggestionsHtml += '<p>Please adjust your inputs to match one of these combinations.</p>';
+        suggestionsHtml += '</div>';
+        
+        // Show the suggestions in a new error element
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'schedule-error';
+        errorDiv.className = 'error';
+        errorDiv.innerHTML = suggestionsHtml;
+        
+        // Remove any existing schedule error
+        const existingError = document.getElementById('schedule-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Insert the error after the courts input
+        const courtsInput = document.getElementById('courts-input');
+        courtsInput.parentNode.insertBefore(errorDiv, courtsInput.nextSibling);
+        
         isValid = false;
     }
-
     
     return isValid;
 }
@@ -114,8 +211,7 @@ function displayProcessedData(N, K) {
     document.getElementById('schedule-params').innerHTML = `
         <strong>Weeks:</strong> ${numWeeks}<br>
         <strong>Courts per week:</strong> ${courtsPerWeek}<br>
-        <strong>Players per week (K):</strong> ${K}<br>
-        <strong>Template file:</strong> ${N}-${K}-${numWeeks}.csv
+        <strong>Players per week:</strong> ${K}<br>
     `;
     document.getElementById('result-container').style.display = 'block';
 }
@@ -182,6 +278,11 @@ function parseAndGenerateSchedule(csvContent) {
 function displaySchedule(schedule) {
     let html = '<h3>🎾 Generated Schedule</h3>';
     
+    // Add download button at the top
+    html += '<div class="download-section">';
+    html += '<button class="btn download-btn" onclick="downloadExcel()">📊 Download Excel File</button>';
+    html += '</div>';
+    
     for (const week of schedule) {
         html += `<div class="week-section">`;
         html += `<h4>${week.week}</h4>`;
@@ -195,12 +296,6 @@ function displaySchedule(schedule) {
         
         html += `</div>`;
     }
-    
-    // Add download button
-    html += '<div class="download-section">';
-    html += '<button class="btn download-btn" onclick="downloadExcel()">📊 Download Excel File</button>';
-    html += '</div>';
-    
     
     document.getElementById('schedule-output').innerHTML = html;
     document.getElementById('schedule-output').style.display = 'block';
@@ -226,6 +321,16 @@ function downloadExcel() {
     
     // Create workbook
     const wb = XLSX.utils.book_new();
+    
+    // If we have the original workbook, copy its first sheet
+    if (originalWorkbook) {
+        const originalSheetName = originalWorkbook.SheetNames[0];
+        const originalSheet = originalWorkbook.Sheets[originalSheetName];
+        
+        // Create a new sheet with the same name and data
+        const newSheet = XLSX.utils.aoa_to_sheet(XLSX.utils.sheet_to_json(originalSheet, { header: 1 }));
+        XLSX.utils.book_append_sheet(wb, newSheet, originalSheetName);
+    }
     
     // Create schedule worksheet
     const scheduleData = [];
@@ -263,26 +368,6 @@ function downloadExcel() {
     
     XLSX.utils.book_append_sheet(wb, scheduleWs, 'Schedule');
     
-    // Create mapping worksheet
-    const mappingData = [];
-    mappingData.push(['Player Name to Number Mapping']);
-    mappingData.push(['']); // Empty row
-    mappingData.push(['Player Name', 'Assigned Number']);
-    
-    for (const [name, number] of Object.entries(nameToNumberMap)) {
-        mappingData.push([name, number]);
-    }
-    
-    const mappingWs = XLSX.utils.aoa_to_sheet(mappingData);
-    
-    // Set column widths for mapping sheet
-    mappingWs['!cols'] = [
-        { width: 25 }, // Player name
-        { width: 15 }  // Number
-    ];
-    
-    XLSX.utils.book_append_sheet(wb, mappingWs, 'Player Mapping');
-    
     // Generate filename with timestamp
     const now = new Date();
     const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
@@ -291,3 +376,51 @@ function downloadExcel() {
     // Download the file
     XLSX.writeFile(wb, filename);
 }
+
+function updateFileDisplay(file) {
+    const fileUpload = document.getElementById('file-upload');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const uploadedFileName = document.getElementById('uploaded-file-name');
+    const removeFileBtn = document.getElementById('remove-file');
+    
+    if (file) {
+        currentFile = file;
+        fileUpload.classList.add('has-file');
+        uploadedFileName.textContent = file.name;
+        fileNameDisplay.classList.add('show');
+        
+        // Update the label text
+        document.querySelector('.file-upload-label').textContent = '📁 Click to change file';
+    } else {
+        currentFile = null;
+        fileUpload.classList.remove('has-file');
+        fileNameDisplay.classList.remove('show');
+        uploadedFileName.textContent = '';
+        
+        // Reset the label text
+        document.querySelector('.file-upload-label').textContent = '📁 Click to upload an Excel file (.xlsx or .xls) with names in the first column';
+        
+        // Clear the file input
+        document.getElementById('file-input').value = '';
+    }
+}
+
+// Add event listener setup
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file-input');
+    const removeFileBtn = document.getElementById('remove-file');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            updateFileDisplay(file);
+        }
+    });
+    
+    removeFileBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updateFileDisplay(null);
+        clearErrors();
+    });
+});

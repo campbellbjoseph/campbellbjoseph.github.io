@@ -9,29 +9,33 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏆 Scheduling Tool</h1>
-            <p>Organize your tournament or league matches</p>
+            <a href="https://campbellbjoseph.com/scheduling"><img src="../images/RallyReady.jpeg" alt="Rally Ready Logo" class="logo" height="150" width="150"></a>
+            <p style="font-size: 0.7em;">Created by <a href="https://campbellbjoseph.com" style="color: #e7eb12;">Joseph Campbell</a></p>
         </div>
         
         <div class="form-container">
             <div class="input-group">
-                <label for="names-input">Player Names (comma-separated)</label>
+                <label>Upload Names from Excel File</label>
+                <div class="file-upload" id="file-upload">
+                    <input type="file" id="file-input" accept=".xlsx,.xls">
+                    <label for="file-input" class="file-upload-label">
+                        📁 Click to upload an Excel file (.xlsx or .xls) with names in the first column
+                    </label>
+                    <div class="file-name-display" id="file-name-display">
+                        <span id="uploaded-file-name"></span>
+                        <span class="remove-file" id="remove-file">×</span>
+                    </div>
+                </div>
+                <div class="error" id="file-error"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="names-input">Or Enter Player Names (comma-separated)</label>
                 <textarea 
                     id="names-input" 
                     placeholder="Enter player names separated by commas, e.g., John, Mary, David, Sarah..."
                 ></textarea>
                 <div class="error" id="names-error"></div>
-            </div>
-
-            <div class="input-group">
-                <label>Or Upload Names from File</label>
-                <div class="file-upload" id="file-upload">
-                    <input type="file" id="file-input" accept=".txt">
-                    <label for="file-input" class="file-upload-label">
-                        📁 Click to upload a .txt file with names (comma-separated)
-                    </label>
-                </div>
-                <div class="error" id="file-error"></div>
             </div>
 
             <div class="input-row">
