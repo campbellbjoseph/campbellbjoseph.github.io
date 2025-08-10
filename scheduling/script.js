@@ -563,10 +563,8 @@ async function createScoresSheet(workbook) {
         // Week header with formula reference to Schedule sheet
         const headerRow = worksheet.getRow(currentRow);
         headerRow.getCell(1).value = { formula: `Schedule!A${weekIndex + 6}` };
-        headerRow.getCell(2).value = 'Team 1';
-        headerRow.getCell(3).value = 'Team 2';
-        headerRow.getCell(4).value = 'Team 1 Score';
-        headerRow.getCell(5).value = 'Team 2 Score';
+        headerRow.getCell(2).value = 'Players';
+        headerRow.getCell(3).value = 'Total Score';
         
         // Style header row
         headerRow.font = { bold: true };
@@ -581,21 +579,21 @@ async function createScoresSheet(workbook) {
         for (let courtIndex = 0; courtIndex < week.matches.length; courtIndex++) {
             const match = week.matches[courtIndex];
             
-            // Generate the 3 sub-matches for this court (round-robin)
-            const subMatches = generateSubMatches(match);
-            
-            for (let subMatchIndex = 0; subMatchIndex < subMatches.length; subMatchIndex++) {
-                const subMatch = subMatches[subMatchIndex];
+            // Create 4 rows for the 4 players on this court
+            for (let playerIndex = 0; playerIndex < match.length; playerIndex++) {
                 const row = worksheet.getRow(currentRow);
                 
-                // Put "Court X:" on the same row as the first submatch
-                const courtLabel = subMatchIndex === 0 ? `Court ${courtIndex + 1}:` : '';
+                // Only put court label on the first player's row
+                if (playerIndex === 0) {
+                    row.getCell(1).value = `Court ${courtIndex + 1}:`;
+                }
                 
-                row.getCell(1).value = courtLabel;
-                row.getCell(2).value = subMatch.team1;
-                row.getCell(3).value = subMatch.team2;
-                row.getCell(4).value = ''; // Empty score cell for Team 1
-                row.getCell(5).value = ''; // Empty score cell for Team 2
+                row.getCell(2).value = match[playerIndex];
+                
+                // Only put score input on the last player's row
+                if (playerIndex === match.length - 1) {
+                    row.getCell(3).value = ''; // Empty score cell
+                }
                 
                 currentRow++;
             }
@@ -606,33 +604,12 @@ async function createScoresSheet(workbook) {
     }
     
     // Set column widths
-    worksheet.getColumn(1).width = 15;
-    worksheet.getColumn(2).width = 20;
-    worksheet.getColumn(3).width = 20;
-    worksheet.getColumn(4).width = 15;
-    worksheet.getColumn(5).width = 15;
+    worksheet.getColumn(1).width = 15; // Court column
+    worksheet.getColumn(2).width = 40; // Players column
+    worksheet.getColumn(3).width = 15; // Score column
 }
 
-function generateSubMatches(players) {
-    // For 4 players [A, B, C, D], generate 3 matches:
-    // A&B vs C&D, A&C vs B&D, A&D vs B&C
-    const [p1, p2, p3, p4] = players;
-    
-    return [
-        {
-            team1: `${p1} & ${p2}`,
-            team2: `${p3} & ${p4}`
-        },
-        {
-            team1: `${p1} & ${p3}`,
-            team2: `${p2} & ${p4}`
-        },
-        {
-            team1: `${p1} & ${p4}`,
-            team2: `${p2} & ${p3}`
-        }
-    ];
-}
+
 
 async function createResultsSheet(workbook) {
     const worksheet = workbook.addWorksheet('Results');
@@ -663,9 +640,9 @@ async function createResultsSheet(workbook) {
         // Add week formulas
         for (let weekNum = 1; weekNum <= numWeeks; weekNum++) {
             const r = playerIndex + 2;
-            const st = 2 + (3 * courtsPerWeek + 2) * (weekNum - 1);
-            const end = st + 3 * courtsPerWeek - 1;
-            const formula = `SUMIF(Scores!$B${st}:$B${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$D${st}:$D${end}) + SUMIF(Scores!$C${st}:$C${end}, CONCAT(CONCAT("*", A${r}), "*"), Scores!$E${st}:$E${end})`;
+            const st = 2 + (courtsPerWeek * 4 + 2) * (weekNum - 1);
+            const end = st + courtsPerWeek * 4 - 1;
+            const formula = `SUMIF(Scores!$B${st}:$B${end}, A${r}, Scores!$C${st}:$C${end})`;
             row.getCell(weekNum + 1).value = { formula: formula };
         }
         
@@ -677,8 +654,27 @@ async function createResultsSheet(workbook) {
         row.getCell(numWeeks + 2).value = { formula: totalFormula };
     }
     
+    // Add weekly totals row
+    const weeklyTotalsRow = worksheet.getRow(playerNames.length + 2);
+    weeklyTotalsRow.getCell(1).value = 'Weekly Totals';
+    weeklyTotalsRow.font = { bold: true };
+    weeklyTotalsRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF0F0F0' }
+    };
+    
+    // Add formulas to sum each week's total points
+    for (let weekNum = 1; weekNum <= numWeeks; weekNum++) {
+        const col = String.fromCharCode(66 + weekNum - 1); // B, C, D, etc.
+        const startRow = 2;
+        const endRow = playerNames.length + 1;
+        const formula = `SUM(${col}${startRow}:${col}${endRow})`;
+        weeklyTotalsRow.getCell(weekNum + 1).value = { formula: formula };
+    }
+    
     // Add footer note
-    const footerRow = worksheet.getRow(playerNames.length + 3);
+    const footerRow = worksheet.getRow(playerNames.length + 4);
     footerRow.getCell(1).value = "If the formulas are not working, it is likely that two players have the same name or one's player name is a substring of another's player name (e.g. 'Beth and Bethany'). Please make the names unique and reload the scheduling, or fix the formulas manually.";
     
     // Set column widths
