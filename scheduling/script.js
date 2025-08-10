@@ -565,6 +565,7 @@ async function createScoresSheet(workbook) {
         headerRow.getCell(1).value = { formula: `Schedule!A${weekIndex + 6}` };
         headerRow.getCell(2).value = 'Players';
         headerRow.getCell(3).value = 'Total Score';
+        headerRow.getCell(4).value = 'Court Total';
         
         // Style header row
         headerRow.font = { bold: true };
@@ -592,7 +593,7 @@ async function createScoresSheet(workbook) {
                 
                 // Only put score input on the last player's row
                 if (playerIndex === match.length - 1) {
-                    row.getCell(3).value = ''; // Empty score cell
+                    row.getCell(4).value = { formula: `SUM(C${currentRow-3}:C${currentRow})` }; // Court total score
                 }
                 
                 currentRow++;
@@ -607,6 +608,7 @@ async function createScoresSheet(workbook) {
     worksheet.getColumn(1).width = 15; // Court column
     worksheet.getColumn(2).width = 40; // Players column
     worksheet.getColumn(3).width = 15; // Score column
+    worksheet.getColumn(4).width = 15; // Court total score column
 }
 
 
