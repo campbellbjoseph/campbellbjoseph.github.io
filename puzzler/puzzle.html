@@ -5,7 +5,7 @@
         <title>SuperCalc</title>
 
         <link rel="stylesheet" href="calcudoku.css">
-        <script type="module" src="scripts/calcudoku.mjs"></script>
+        <script type="module" src="scripts/KenKenGame.mjs"></script>
     </head>
         <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-78B3CE9ZLV"></script>
@@ -78,10 +78,9 @@
 
             function myFunction() {
                 let uid = document.getElementById("uid");
-                console.log(uid.value);
-                //uid.select(); 
-                //uid.setSelectionRange(0, 99999);
-                navigator.clipboard.writeText(uid.value);
+                let puzzleId = uid.dataset.value || uid.value;
+                console.log(puzzleId);
+                navigator.clipboard.writeText(puzzleId);
                 document.getElementById("copybutton").innerHTML = "Copied!"
             }
         </script>

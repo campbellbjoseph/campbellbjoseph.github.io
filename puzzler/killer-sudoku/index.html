@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Killer Sudoku</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e74c3c;
+            font-size: 2.1em;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .container label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .container input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .container select {
+            padding: 8px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .container button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container button:hover {
+            background-color: #c0392b;
+        }
+
+        .container a {
+            text-decoration: none;
+            color: #e74c3c;
+            display: block;
+            margin-top: 20px;
+        }
+
+        .container a:hover {
+            text-decoration: underline;
+        }
+
+        #bottom {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .size-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .size-option {
+            padding: 10px 20px;
+            border: 2px solid #e74c3c;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .size-option:hover {
+            background-color: #fde8e6;
+        }
+
+        .size-option.selected {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Killer Sudoku!</h1>
+        <a href="../../puzzler/index.html">Play KenKen instead</a>
+        <a href="../../index.html">Return to home page</a>
+        <hr>
+
+        <label for="uid">Paste unique puzzle ID:</label>
+        <input type="text" id="unique_id">
+        <button onclick="use_id()">Go</button>
+
+        <p>Or generate a new puzzle:</p>
+        
+        <div>
+            <label>Grid Size:</label>
+            <div class="size-options">
+                <div class="size-option" data-size="4" onclick="selectSize(4)">4×4</div>
+                <div class="size-option" data-size="6" onclick="selectSize(6)">6×6</div>
+                <div class="size-option selected" data-size="9" onclick="selectSize(9)">9×9</div>
+            </div>
+        </div>
+        
+        <label for="diff">Difficulty:</label>
+        <select id="diff">
+            <option value="0">Easy</option>
+            <option value="1">Medium</option>
+            <option value="2">Hard</option>
+        </select>
+
+        <br><br>
+        <button onclick="proceed()">Start</button>
+        <button onclick="display()" id="inst">Instructions</button>
+
+        <div id="bottom"></div>
+    </div>
+
+    <script>
+        let selectedSize = 9;
+
+        function selectSize(size) {
+            selectedSize = size;
+            document.querySelectorAll('.size-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelector(`[data-size="${size}"]`).classList.add('selected');
+        }
+
+        function use_id() {
+            let id = document.getElementById("unique_id").value.trim();
+            if (id === '') {
+                proceed();
+            } else {
+                location.href = "puzzle.html?0|" + id;
+            }
+        }
+
+        function proceed() {
+            let s = "puzzle.html?" + selectedSize + 
+                "|" + document.getElementById("diff").value;
+            location.href = s;
+        }
+
+        function display() {
+            let d = document.createElement("div");
+            d.style = "display:inline-block; text-align: left;";
+            d.id = "instructions"
+            d.innerHTML = `
+                <h3>How to Play Killer Sudoku</h3>
+                <p><b>Basic Sudoku Rules:</b></p>
+                <ul>
+                    <li>Fill the grid so each row contains all numbers 1-N</li>
+                    <li>Each column must also contain all numbers 1-N</li>
+                    <li>Each box (outlined in bold) must contain all numbers 1-N</li>
+                </ul>
+                <p><b>Killer Sudoku Rules:</b></p>
+                <ul>
+                    <li>Cells are grouped into "cages" (dotted outlines)</li>
+                    <li>The small number in each cage is the sum of all cells in that cage</li>
+                    <li>No number can repeat within a cage</li>
+                </ul>
+                <p><b>Example:</b> A cage marked "6" with 2 cells must contain numbers that sum to 6 (like 1+5, 2+4)</p>
+            `;
+            document.getElementById("bottom").append(d);
+            document.getElementById("inst").onclick = rem;
+            document.getElementById("inst").innerText = "Clear";
+        }
+
+        function rem() {
+            document.getElementById("instructions").remove();
+            document.getElementById("inst").onclick = display;
+            document.getElementById("inst").innerText = "Instructions";
+        }
+    </script>
+</body>
+</html>
+

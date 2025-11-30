@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Killer Sudoku</title>
+
+    <link rel="stylesheet" href="../calcudoku.css">
+    <link rel="stylesheet" href="killer-sudoku.css">
+    <script type="module" src="../scripts/KillerSudokuGame.mjs"></script>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-78B3CE9ZLV"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-78B3CE9ZLV');
+</script>
+
+<body>
+    <div id="title">
+        <span class="digit" id="min">00</span>
+        <span class="txt">:</span>
+        <span class="digit" id="sec">00</span>
+    </div>
+    
+    <hr>
+    <div id="note-div"></div>
+
+    <div id="board"></div>
+    <br>
+    <div id="solving">
+        <button onclick="myFunction()" id="copybutton">Copy Puzzle ID</button>
+    </div>
+    <div id="digits"></div>
+    <div id="buttons"></div>
+    
+    <div id="Instructions" style="text-align: center;">
+        <div style="display:inline-block; text-align: left;" id="actual">
+            <h3>Keyboard Shortcuts</h3>
+            <b>N</b>: Take notes <br>
+            <b>D</b>: Delete <br>
+            <b>U</b>: Undo <br>
+            <b>S</b>: Save current state <br>
+            <b>R</b>: Return to saved state <br>
+            <b>P</b>: Add all notes <br>
+            <b>M</b>: Remove all notes <br>
+            <b>Shift</b>: Reset buttons <br>
+            <b>Enter</b>: Submit puzzle <br>
+            <b>&#x1F525 &#x1F525</b>: Super fast <br>
+            <b>&#x1F525</b>: Fast <br>
+            <b>&#x1F422</b>: Slow <br>
+            <b>&#x1F422 &#x1F422</b>: Super slow<br>
+            <button onclick="display()" class="button" id="inst">Instructions</button>
+        </div>
+    </div>
+    
+    <script>
+        function display() {
+            let d = document.getElementById("actual");
+            d.innerHTML += `
+                <hr>
+                <h4>How to Play Killer Sudoku</h4>
+                <b>Basic Sudoku Rules:</b><br>
+                - Each row must contain all numbers 1-N<br>
+                - Each column must contain all numbers 1-N<br>
+                - Each box (bold outline) must contain all numbers 1-N<br><br>
+                <b>Killer Rules:</b><br>
+                - Cells are grouped into cages (dotted outlines)<br>
+                - The small number shows the sum of all cells in that cage<br>
+                - No number can repeat within a cage<br>
+            `;
+            document.getElementById("inst").onclick = rem;
+            document.getElementById("inst").innerText = "Clear"; 
+        }
+
+        function rem() {
+            // Just reload to clear
+            location.reload();
+        }
+
+        function myFunction() {
+            let uid = document.getElementById("uid");
+            let puzzleId = uid.dataset.value || uid.value;
+            console.log(puzzleId);
+            navigator.clipboard.writeText(puzzleId);
+            document.getElementById("copybutton").innerHTML = "Copied!"
+        }
+    </script>
+</body>
+</html>
+

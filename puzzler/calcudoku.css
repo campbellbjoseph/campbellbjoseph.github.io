@@ -47,18 +47,22 @@ hr {
     left: 0;
 }
 
-.note {
-    width: 10px;
-    height: 12px;
-    margin-bottom: 5%;
-    margin-left: 0%;
-
-    justify-content: left;
+.notes-container {
     position: absolute;
-    font-size: 12px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.note {
+    font-size: 11px;
     font-weight: bold;
-    bottom: 0;
-    left: 0;
+    line-height: 1;
 }
 
 #digits {

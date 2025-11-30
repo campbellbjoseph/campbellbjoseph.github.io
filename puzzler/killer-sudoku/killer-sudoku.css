@@ -1,0 +1,218 @@
+/**
+ * Killer Sudoku specific styles
+ * Extends calcudoku.css with Sudoku-specific styling
+ */
+
+/* ===========================================
+   GRID STRUCTURE
+   - All cells have solid 1px borders (gridlines)
+   - Cage outlines are drawn INSIDE cells as dashed pseudo-elements
+   - Box borders are thicker solid lines
+   - Outer edge has thick border
+   =========================================== */
+
+/* Base tile - solid gridlines */
+.tile {
+    border: 1px solid #999 !important;
+    position: relative;
+}
+
+/* Outer edge - thick border (same as KenKen) */
+.tile.thicc-top {
+    border-top: 3px solid #000 !important;
+}
+
+.tile.thicc-bottom {
+    border-bottom: 3px solid #000 !important;
+}
+
+.tile.thicc-left {
+    border-left: 3px solid #000 !important;
+}
+
+.tile.thicc-right {
+    border-right: 3px solid #000 !important;
+}
+
+/* Sudoku box borders - medium thickness */
+.tile.box-top {
+    border-top: 2px solid #000 !important;
+}
+
+.tile.box-bottom {
+    border-bottom: 2px solid #000 !important;
+}
+
+.tile.box-left {
+    border-left: 2px solid #000 !important;
+}
+
+.tile.box-right {
+    border-right: 2px solid #000 !important;
+}
+
+/* ===========================================
+   CAGE OUTLINES (drawn inside the cells)
+   Using pseudo-element for dashed inner border
+   =========================================== */
+
+/* Remove the default thick borders from KenKen */
+.tile.thick-top,
+.tile.thick-bottom,
+.tile.thick-left,
+.tile.thick-right {
+    /* Don't override the base border */
+}
+
+/* Create inner cage outline using ::after pseudo-element */
+.tile::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    pointer-events: none;
+    border: none;
+}
+
+/* Cage borders - dashed lines inside the cell (red) */
+.tile.thick-top::after {
+    border-top: 2px dashed #c0392b;
+}
+
+.tile.thick-bottom::after {
+    border-bottom: 2px dashed #c0392b;
+}
+
+.tile.thick-left::after {
+    border-left: 2px dashed #c0392b;
+}
+
+.tile.thick-right::after {
+    border-right: 2px dashed #c0392b;
+}
+
+/* Combined cage borders */
+.tile.thick-top.thick-left::after {
+    border-top: 2px dashed #c0392b;
+    border-left: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-right::after {
+    border-top: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-bottom.thick-left::after {
+    border-bottom: 2px dashed #c0392b;
+    border-left: 2px dashed #c0392b;
+}
+
+.tile.thick-bottom.thick-right::after {
+    border-bottom: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-bottom::after {
+    border-top: 2px dashed #c0392b;
+    border-bottom: 2px dashed #c0392b;
+}
+
+.tile.thick-left.thick-right::after {
+    border-left: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-left.thick-right::after {
+    border-top: 2px dashed #c0392b;
+    border-left: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-bottom.thick-left::after {
+    border-top: 2px dashed #c0392b;
+    border-bottom: 2px dashed #c0392b;
+    border-left: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-bottom.thick-right::after {
+    border-top: 2px dashed #c0392b;
+    border-bottom: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-bottom.thick-left.thick-right::after {
+    border-bottom: 2px dashed #c0392b;
+    border-left: 2px dashed #c0392b;
+    border-right: 2px dashed #c0392b;
+}
+
+.tile.thick-top.thick-bottom.thick-left.thick-right::after {
+    border: 2px dashed #c0392b;
+}
+
+/* ===========================================
+   CAGE SUM NUMBERS (bigger and more visible)
+   =========================================== */
+
+.tile .instruction {
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    z-index: 10;
+    background: transparent;
+    padding: 1px 2px;
+}
+
+/* ===========================================
+   COLOR THEME
+   =========================================== */
+
+#board {
+    background-color: #fff;
+}
+
+.number-selected {
+    background-color: #e74c3c !important;
+}
+
+.tile-selected {
+    background-color: #fadbd8 !important;
+}
+
+.tile-hovered {
+    background-color: #f5b7b1 !important;
+}
+
+.submit {
+    background-color: #e74c3c;
+}
+
+.submit:hover,
+.submit-hovered {
+    background-color: #c0392b;
+}
+
+.menu {
+    background-color: #e74c3c !important;
+}
+
+.menu:hover {
+    background-color: #c0392b !important;
+}
+
+/* ===========================================
+   NOTES (Killer Sudoku specific)
+   =========================================== */
+
+.notes-container {
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+}
+
+.note {
+    font-size: 10px;
+    color: #666;
+}

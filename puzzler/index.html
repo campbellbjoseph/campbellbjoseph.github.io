@@ -108,6 +108,7 @@
 <body>
     <div class="container">
         <h1>Welcome to SuperCalc!</h1>
+        <a href="../puzzler/killer-sudoku/index.html">Play Killer Sudoku instead</a>
         <a href="../index.html">Return to home page</a>
         <hr>
         <button onclick="daily()">Try the Puzzle of the Day!</button>
@@ -147,7 +148,13 @@
             location.href = "puzzle.html?1|0|0|0|0|0|0";
         }
         function use_id() {
-            location.href = "puzzle.html?0|" + document.getElementById("unique_id").value;
+            let id = document.getElementById("unique_id").value.trim();
+            if (id === '') {
+                // No ID provided - generate with current parameters instead
+                proceed();
+            } else {
+                location.href = "puzzle.html?0|" + id;
+            }
         }
 
         function proceed() {
