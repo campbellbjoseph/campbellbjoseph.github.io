@@ -219,6 +219,11 @@
     background-color: #dcc8f5 !important;
 }
 
+/* Error state on diagonal cells - red takes priority */
+.tile.diagonal-cell.wrong-tile {
+    background-color: rgb(158, 61, 61) !important;
+}
+
 /* ===========================================
    NOTES (Killer Sudoku specific)
    =========================================== */
