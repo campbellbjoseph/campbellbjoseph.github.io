@@ -48,6 +48,29 @@ export class GameState {
         // Mode flags
         this.isDeleting = false;
         this.isTakingNotes = false;
+        this.isHoverMode = false;
+        this.hoveredCageCells = [];
+    }
+
+    /**
+     * Toggles hover mode (highlight entire cage on hover)
+     * @returns {boolean} New hover mode state
+     */
+    toggleHoverMode() {
+        this.isHoverMode = !this.isHoverMode;
+        return this.isHoverMode;
+    }
+
+    /**
+     * Gets the cage at a given tile
+     * @param {string} tileId - "row-col" format
+     * @returns {object|null} The cage containing this tile, or null
+     */
+    getCageAtTile(tileId) {
+        const [row, col] = tileId.split('-').map(Number);
+        return this.puzzle.cages.find(cage => 
+            cage.cells.some(([r, c]) => r === row && c === col)
+        ) || null;
     }
 
     /**

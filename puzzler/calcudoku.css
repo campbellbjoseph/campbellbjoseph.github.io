@@ -161,6 +161,35 @@ img {
     align-items: center;
 }
 
+.hoverButton {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: white;
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hoverButton img {
+    width: 32px;
+    height: 32px;
+}
+
+.hoverButton-hovered {
+    background-color: rgb(220, 246, 255);
+}
+
+.button-active {
+    background-color: rgb(180, 230, 255) !important;
+    border: 2px solid #0088cc !important;
+}
+
 .reset {
     width: 50px;
     height: 50px;

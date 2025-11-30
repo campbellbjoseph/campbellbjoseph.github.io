@@ -77,7 +77,20 @@ export class Controls {
      */
     _handleTileHover(tileId) {
         this.state.hoveredTile = tileId;
-        this.renderer.setTileHovered(tileId, true);
+        
+        if (this.state.isHoverMode) {
+            // Highlight entire cage
+            const cage = this.state.getCageAtTile(tileId);
+            if (cage) {
+                this.state.hoveredCageCells = cage.cells.map(([r, c]) => `${r}-${c}`);
+                for (const cellId of this.state.hoveredCageCells) {
+                    this.renderer.setTileHovered(cellId, true);
+                }
+            }
+        } else {
+            // Default: highlight single tile
+            this.renderer.setTileHovered(tileId, true);
+        }
     }
 
     /**
@@ -86,7 +99,17 @@ export class Controls {
      */
     _handleTileLeave(tileId) {
         this.state.hoveredTile = null;
-        this.renderer.setTileHovered(tileId, false);
+        
+        if (this.state.isHoverMode && this.state.hoveredCageCells.length > 0) {
+            // Clear all cage cell highlights
+            for (const cellId of this.state.hoveredCageCells) {
+                this.renderer.setTileHovered(cellId, false);
+            }
+            this.state.hoveredCageCells = [];
+        } else {
+            // Default: clear single tile
+            this.renderer.setTileHovered(tileId, false);
+        }
     }
 
     /**
@@ -557,7 +580,18 @@ export class Controls {
             case 'KeyR':
                 this.restoreState();
                 break;
+            case 'KeyH':
+                this.toggleHoverMode();
+                break;
         }
+    }
+
+    /**
+     * Toggles hover mode (highlight entire cage on hover)
+     */
+    toggleHoverMode() {
+        const isActive = this.state.toggleHoverMode();
+        this.renderer.setButtonActive('hover-btn', isActive);
     }
 
     /**

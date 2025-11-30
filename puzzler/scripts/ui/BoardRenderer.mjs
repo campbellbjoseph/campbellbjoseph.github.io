@@ -274,6 +274,10 @@ export class BoardRenderer {
         const note = this._createButton('note', 'noteButton', `${this.imagePath}/pencil.png`, callbacks.onNote);
         container.appendChild(note);
         
+        // Hover mode button
+        const hover = this._createButton('hover-btn', 'hoverButton', `${this.imagePath}/eye.png`, callbacks.onHover);
+        container.appendChild(hover);
+        
         // Reset button
         const reset = this._createButton('reset', 'reset', `${this.imagePath}/reset.png`, callbacks.onReset);
         container.appendChild(reset);
@@ -281,6 +285,22 @@ export class BoardRenderer {
         // Set container width
         const tileSize = this.n <= 10 ? 75 : 65;
         container.style.width = `${tileSize * this.n}px`;
+    }
+
+    /**
+     * Sets a button's active state
+     * @param {string} buttonId 
+     * @param {boolean} isActive 
+     */
+    setButtonActive(buttonId, isActive) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+        
+        if (isActive) {
+            button.classList.add('button-active');
+        } else {
+            button.classList.remove('button-active');
+        }
     }
 
     /**

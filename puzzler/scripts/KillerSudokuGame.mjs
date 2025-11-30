@@ -137,6 +137,7 @@ export class KillerSudokuGame {
                     this.controls.startNotes();
                 }
             },
+            onHover: () => this.controls.toggleHoverMode(),
             onReset: () => this.controls.reset()
         });
         
