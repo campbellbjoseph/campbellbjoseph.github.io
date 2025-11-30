@@ -55,11 +55,14 @@ export class GameState {
      */
     _initializeGivenCells() {
         for (const cage of this.puzzle.cages) {
-            if (cage.cells.length === 1 && cage.operator !== 'HIDE') {
+            if (cage.cells.length === 1) {
                 const [r, c] = cage.cells[0];
                 const key = `${r}-${c}`;
                 this.givenCells.add(key);
-                this.board.set(key, cage.target);
+                // Don't set board value for hidden cells (they show 'X')
+                if (cage.operator !== 'HIDE') {
+                    this.board.set(key, cage.target);
+                }
             }
         }
     }
@@ -121,8 +124,11 @@ export class GameState {
             }
         }
 
-        // Store for undo
-        this.lastAction = { tileId, value, previousValue: this.board.get(tileId) };
+        // Store for undo (including any notes that were on this cell)
+        const previousNotes = this.notes.has(tileId) 
+            ? [...this.notes.get(tileId)] 
+            : [];
+        this.lastAction = { tileId, value, previousValue: this.board.get(tileId), previousNotes };
         
         // Place value
         this.board.set(tileId, value);
@@ -310,12 +316,12 @@ export class GameState {
 
     /**
      * Undoes the last action
-     * @returns {{tileId: string, restoredNotes: string[]}|null}
+     * @returns {{tileId: string, restoredNotes: string[], cellNotesRestored: boolean}|null}
      */
     undo() {
         if (!this.lastAction) return null;
         
-        const { tileId, value, previousValue } = this.lastAction;
+        const { tileId, value, previousValue, previousNotes } = this.lastAction;
         
         // Restore previous value (or clear)
         if (previousValue !== undefined) {
@@ -324,7 +330,14 @@ export class GameState {
             this.board.delete(tileId);
         }
         
-        // Restore affected notes
+        // Restore notes that were on this cell before the value was placed
+        let cellNotesRestored = false;
+        if (previousNotes && previousNotes.length > 0) {
+            this.notes.set(tileId, new Set(previousNotes));
+            cellNotesRestored = true;
+        }
+        
+        // Restore affected notes in other cells (row/column/box)
         const restoredNotes = [];
         for (const affectedTileId of this.affectedTiles) {
             this.addNote(affectedTileId, value);
@@ -334,7 +347,7 @@ export class GameState {
         this.lastAction = null;
         this.affectedTiles = [];
         
-        return { tileId, restoredNotes };
+        return { tileId, restoredNotes, cellNotesRestored };
     }
 
     /**

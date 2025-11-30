@@ -400,6 +400,9 @@ export class Controls {
         for (let r = 0; r < this.state.n; r++) {
             for (let c = 0; c < this.state.n; c++) {
                 const tileId = `${r}-${c}`;
+                // Skip non-editable cells (given values, hidden clue X cells)
+                if (!this.state.isEditable(tileId)) continue;
+                
                 if (!this.state.getValue(tileId) && this.state.getNotes(tileId).length === 0) {
                     this.state.fillAllNotes(tileId);
                     const notes = this.state.getNotes(tileId);
