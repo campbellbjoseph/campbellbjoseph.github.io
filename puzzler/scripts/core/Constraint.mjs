@@ -191,6 +191,91 @@ export class BoxUniqueness extends Constraint {
 }
 
 /**
+ * Diagonal uniqueness constraint for Sudoku X
+ * Ensures both main diagonals contain unique values
+ */
+export class DiagonalUniqueness extends Constraint {
+    /**
+     * Checks if a cell is on the main diagonal (top-left to bottom-right)
+     * @param {number} row 
+     * @param {number} col 
+     * @returns {boolean}
+     */
+    isOnMainDiagonal(row, col) {
+        return row === col;
+    }
+
+    /**
+     * Checks if a cell is on the anti-diagonal (top-right to bottom-left)
+     * @param {number} row 
+     * @param {number} col 
+     * @param {number} n - Grid size
+     * @returns {boolean}
+     */
+    isOnAntiDiagonal(row, col, n) {
+        return row + col === n - 1;
+    }
+
+    /**
+     * Gets all cells on the main diagonal
+     * @param {number} n - Grid size
+     * @returns {[number, number][]}
+     */
+    getMainDiagonalCells(n) {
+        const cells = [];
+        for (let i = 0; i < n; i++) {
+            cells.push([i, i]);
+        }
+        return cells;
+    }
+
+    /**
+     * Gets all cells on the anti-diagonal
+     * @param {number} n - Grid size
+     * @returns {[number, number][]}
+     */
+    getAntiDiagonalCells(n) {
+        const cells = [];
+        for (let i = 0; i < n; i++) {
+            cells.push([i, n - 1 - i]);
+        }
+        return cells;
+    }
+
+    /**
+     * Checks if placing a value at a coordinate maintains diagonal uniqueness
+     * @param {number[][]} grid - Current grid state
+     * @param {[number, number]} coord - [row, col] coordinate
+     * @param {number} value - Value to place
+     * @param {number} n - Grid size
+     * @returns {boolean} True if placement is valid
+     */
+    canPlace(grid, coord, value, n) {
+        const [row, col] = coord;
+
+        // Check main diagonal if this cell is on it
+        if (this.isOnMainDiagonal(row, col)) {
+            for (let i = 0; i < n; i++) {
+                if (i !== row && grid[i][i] === value) {
+                    return false;
+                }
+            }
+        }
+
+        // Check anti-diagonal if this cell is on it
+        if (this.isOnAntiDiagonal(row, col, n)) {
+            for (let i = 0; i < n; i++) {
+                if (i !== row && grid[i][n - 1 - i] === value) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
+/**
  * Composite constraint that combines multiple constraints
  */
 export class CompositeConstraint extends Constraint {

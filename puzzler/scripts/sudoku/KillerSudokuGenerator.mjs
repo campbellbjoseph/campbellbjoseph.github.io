@@ -3,7 +3,7 @@
  */
 
 import { createEmptyGrid, isValidCoord, shuffleArray, cloneGrid } from '../core/Grid.mjs';
-import { RowColumnUniqueness, BoxUniqueness, CompositeConstraint } from '../core/Constraint.mjs';
+import { RowColumnUniqueness, BoxUniqueness, DiagonalUniqueness, CompositeConstraint } from '../core/Constraint.mjs';
 import { Solver, createPossibleValuesMap } from '../core/Solver.mjs';
 import { KillerCageConstraint, isSumAchievable } from './SudokuConstraints.mjs';
 
@@ -53,8 +53,9 @@ export class KillerSudokuPuzzle {
      * @param {KillerCage[]} cages - Array of cages
      * @param {number[][]} solution - Solution grid
      * @param {number} difficulty - Difficulty level (0-2)
+     * @param {boolean} sudokuX - Whether this is a Sudoku X (diagonal constraints)
      */
-    constructor(n, boxRows, boxCols, cages, solution, difficulty) {
+    constructor(n, boxRows, boxCols, cages, solution, difficulty, sudokuX = false) {
         this.n = n;
         this.boxRows = boxRows;
         this.boxCols = boxCols;
@@ -68,7 +69,8 @@ export class KillerSudokuPuzzle {
             gcd: false,
             lcm: false,
             zero: false,
-            hidden: false
+            hidden: false,
+            sudokuX: sudokuX
         };
     }
 
@@ -104,12 +106,14 @@ export class KillerSudokuPuzzle {
  * @param {number} n - Grid size
  * @param {number} boxRows - Rows per box
  * @param {number} boxCols - Columns per box
+ * @param {boolean} sudokuX - Whether to enforce diagonal constraints
  * @returns {number[][]|null} Valid Sudoku grid or null if failed
  */
-export function generateSudokuGrid(n, boxRows, boxCols) {
+export function generateSudokuGrid(n, boxRows, boxCols, sudokuX = false) {
     const grid = createEmptyGrid(n);
     const rowConstraint = new RowColumnUniqueness();
     const boxConstraint = new BoxUniqueness(boxRows, boxCols);
+    const diagonalConstraint = sudokuX ? new DiagonalUniqueness() : null;
     
     // Create array of all values and shuffle for randomness
     const values = Array.from({ length: n }, (_, i) => i + 1);
@@ -128,7 +132,8 @@ export function generateSudokuGrid(n, boxRows, boxCols) {
         
         for (const value of shuffledValues) {
             if (rowConstraint.canPlace(grid, [row, col], value, n) &&
-                boxConstraint.canPlace(grid, [row, col], value, n)) {
+                boxConstraint.canPlace(grid, [row, col], value, n) &&
+                (!diagonalConstraint || diagonalConstraint.canPlace(grid, [row, col], value, n))) {
                 grid[row][col] = value;
                 
                 if (solve(nextRow, nextCol)) {
@@ -242,14 +247,20 @@ export function generateCages(grid, n, difficulty) {
  * @param {number} boxRows - Rows per box
  * @param {number} boxCols - Columns per box
  * @param {KillerCage[]} cages - Array of cages
+ * @param {boolean} sudokuX - Whether to enforce diagonal constraints
  * @returns {CompositeConstraint}
  */
-export function createConstraints(n, boxRows, boxCols, cages) {
+export function createConstraints(n, boxRows, boxCols, cages, sudokuX = false) {
     const composite = new CompositeConstraint();
     
     // Add Sudoku constraints
     composite.add(new RowColumnUniqueness());
     composite.add(new BoxUniqueness(boxRows, boxCols));
+    
+    // Add diagonal constraint for Sudoku X
+    if (sudokuX) {
+        composite.add(new DiagonalUniqueness());
+    }
     
     // Add cage constraints
     for (const cage of cages) {
@@ -275,10 +286,11 @@ export function precomputePossibleValues(n, cages) {
  * Generates a valid Killer Sudoku puzzle
  * @param {number} n - Grid size (4, 6, 9, or 12)
  * @param {number} difficulty - Difficulty (0-2)
+ * @param {boolean} sudokuX - Whether to enforce diagonal constraints
  * @param {number} maxAttempts - Maximum generation attempts
  * @returns {KillerSudokuPuzzle|null}
  */
-export function generatePuzzle(n, difficulty, maxAttempts = 50) {
+export function generatePuzzle(n, difficulty, sudokuX = false, maxAttempts = 50) {
     const boxConfig = BOX_CONFIGS[n];
     if (!boxConfig) {
         console.error(`Unsupported grid size: ${n}`);
@@ -288,8 +300,8 @@ export function generatePuzzle(n, difficulty, maxAttempts = 50) {
     const { rows: boxRows, cols: boxCols } = boxConfig;
     
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        // Generate valid Sudoku solution
-        const solution = generateSudokuGrid(n, boxRows, boxCols);
+        // Generate valid Sudoku solution (with diagonal constraints if sudokuX)
+        const solution = generateSudokuGrid(n, boxRows, boxCols, sudokuX);
         if (!solution) continue;
         
         // Generate cages
@@ -306,7 +318,7 @@ export function generatePuzzle(n, difficulty, maxAttempts = 50) {
         if (!validCages) continue;
         
         // Create constraints and verify unique solution
-        const constraints = createConstraints(n, boxRows, boxCols, cages);
+        const constraints = createConstraints(n, boxRows, boxCols, cages, sudokuX);
         const possibleValues = precomputePossibleValues(n, cages);
         const initialGrid = createEmptyGrid(n);
         
@@ -319,7 +331,7 @@ export function generatePuzzle(n, difficulty, maxAttempts = 50) {
         }
         
         console.log(`Puzzle generated in ${attempt + 1} attempts`);
-        return new KillerSudokuPuzzle(n, boxRows, boxCols, cages, solution, difficulty);
+        return new KillerSudokuPuzzle(n, boxRows, boxCols, cages, solution, difficulty, sudokuX);
     }
     
     console.log(`Failed to generate puzzle after ${maxAttempts} attempts`);

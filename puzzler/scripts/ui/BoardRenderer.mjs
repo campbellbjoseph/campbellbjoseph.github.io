@@ -111,6 +111,15 @@ export class BoardRenderer {
                 }
             }
             
+            // Diagonal cell styling (Sudoku X only)
+            if (this.puzzle.specialFlags?.sudokuX) {
+                const isOnMainDiagonal = r === c;
+                const isOnAntiDiagonal = r + c === this.n - 1;
+                if (isOnMainDiagonal || isOnAntiDiagonal) {
+                    tile.classList.add('diagonal-cell');
+                }
+            }
+            
             // Single-cell cages show their value
             if (isSingleCell) {
                 if (isHidden) {

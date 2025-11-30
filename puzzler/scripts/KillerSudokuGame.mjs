@@ -62,7 +62,7 @@ export class KillerSudokuGame {
     _generatePuzzle(params) {
         console.log('Generating Killer Sudoku with params:', params);
         
-        this.puzzle = generatePuzzle(params.n, params.difficulty);
+        this.puzzle = generatePuzzle(params.n, params.difficulty, params.sudokuX || false);
         
         if (!this.puzzle) {
             alert('Failed to generate puzzle. Please try again.');

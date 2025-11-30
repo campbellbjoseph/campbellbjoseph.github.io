@@ -111,6 +111,34 @@
             background-color: #e74c3c;
             color: white;
         }
+
+        .variant-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .variant-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .variant-option label {
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .variant-description {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -142,7 +170,15 @@
             <option value="2">Hard</option>
         </select>
 
-        <br><br>
+        <div class="variant-option">
+            <input type="checkbox" id="sudokuX" name="sudokuX">
+            <label for="sudokuX"><b>Sudoku X</b> - Diagonal constraint</label>
+        </div>
+        <div class="variant-description">
+            Both main diagonals must also contain unique numbers 1-N
+        </div>
+
+        <br>
         <button onclick="proceed()">Start</button>
         <button onclick="display()" id="inst">Instructions</button>
 
@@ -170,8 +206,10 @@
         }
 
         function proceed() {
+            let sudokuX = document.getElementById("sudokuX").checked ? "1" : "0";
             let s = "puzzle.html?" + selectedSize + 
-                "|" + document.getElementById("diff").value;
+                "|" + document.getElementById("diff").value +
+                "|" + sudokuX;
             location.href = s;
         }
 

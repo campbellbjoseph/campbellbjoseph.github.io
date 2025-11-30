@@ -203,6 +203,23 @@
 }
 
 /* ===========================================
+   SUDOKU X DIAGONAL CELLS
+   =========================================== */
+
+.tile.diagonal-cell {
+    background-color: #f0e6ff;
+}
+
+/* Preserve diagonal color on hover/select states */
+.tile.diagonal-cell.tile-selected {
+    background-color: #e8d4ff !important;
+}
+
+.tile.diagonal-cell.tile-hovered {
+    background-color: #dcc8f5 !important;
+}
+
+/* ===========================================
    NOTES (Killer Sudoku specific)
    =========================================== */
 
@@ -214,5 +231,5 @@
 
 .note {
     font-size: 10px;
-    color: #666;
+    color: #000000;
 }

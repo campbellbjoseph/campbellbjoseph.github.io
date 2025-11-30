@@ -21,10 +21,11 @@ const CHAR_SET = "ugMyQszjSnLoDBfVOPrTNvYEJmKbRixItceClXqkAFUHdGwZahpW";
  * @returns {string} Encoded puzzle ID
  */
 export function encode(puzzle) {
-    const { n, cages, difficulty } = puzzle;
+    const { n, cages, difficulty, specialFlags } = puzzle;
+    const sudokuX = specialFlags?.sudokuX ? 1 : 0;
     
-    // Header: n, difficulty
-    let encoded = CHAR_SET[n] + CHAR_SET[difficulty] + '-';
+    // Header: n, difficulty, sudokuX
+    let encoded = CHAR_SET[n] + CHAR_SET[difficulty] + CHAR_SET[sudokuX] + '-';
     
     // Encode cage grid (which cage each cell belongs to)
     const cageGrid = puzzle.getCageGrid();
@@ -61,6 +62,8 @@ export function decode(puzzleId) {
     const header = parts[0];
     const n = CHAR_SET.indexOf(header[0]);
     const difficulty = CHAR_SET.indexOf(header[1]);
+    // sudokuX flag (may not exist in older puzzle IDs)
+    const sudokuX = header.length > 2 ? CHAR_SET.indexOf(header[2]) === 1 : false;
     
     const boxConfig = getBoxConfig(n);
     if (!boxConfig) {
@@ -106,8 +109,8 @@ export function decode(puzzleId) {
         cages.push(new KillerCage(id, cells, target));
     }
     
-    // Solve to get solution
-    const constraints = createConstraints(n, boxConfig.rows, boxConfig.cols, cages);
+    // Solve to get solution (with diagonal constraints if sudokuX)
+    const constraints = createConstraints(n, boxConfig.rows, boxConfig.cols, cages, sudokuX);
     const possibleValues = precomputePossibleValues(n, cages);
     const initialGrid = createEmptyGrid(n);
     
@@ -120,7 +123,8 @@ export function decode(puzzleId) {
         boxConfig.cols, 
         cages, 
         solution, 
-        difficulty
+        difficulty,
+        sudokuX
     );
 }
 
@@ -148,12 +152,13 @@ export function parseQueryString(queryString) {
         };
     } else {
         // Generate new puzzle
-        // Format: n|difficulty
+        // Format: n|difficulty|sudokuX
         return {
             mode: 'generate',
             params: {
                 n: modeIndicator,
-                difficulty: parseInt(parts[1]) || 0
+                difficulty: parseInt(parts[1]) || 0,
+                sudokuX: parts[2] === '1'
             }
         };
     }
@@ -175,7 +180,8 @@ export function createPuzzleUrl(puzzle) {
  * @returns {string} URL path with query string
  */
 export function createNewPuzzleUrl(puzzle) {
-    const { n, difficulty } = puzzle;
-    return `puzzle.html?${n}|${difficulty}`;
+    const { n, difficulty, specialFlags } = puzzle;
+    const sudokuX = specialFlags?.sudokuX ? '1' : '0';
+    return `puzzle.html?${n}|${difficulty}|${sudokuX}`;
 }
 

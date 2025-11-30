@@ -123,6 +123,28 @@ export class GameState {
                 }
             }
         }
+        
+        // Check for diagonal conflicts (Sudoku X only)
+        if (this.puzzle.specialFlags?.sudokuX) {
+            // Main diagonal (row === col)
+            if (row === col) {
+                for (let i = 0; i < this.n; i++) {
+                    if (i !== row) {
+                        const otherVal = this.board.get(`${i}-${i}`);
+                        if (otherVal === value) isError = true;
+                    }
+                }
+            }
+            // Anti-diagonal (row + col === n - 1)
+            if (row + col === this.n - 1) {
+                for (let i = 0; i < this.n; i++) {
+                    if (i !== row) {
+                        const otherVal = this.board.get(`${i}-${this.n - 1 - i}`);
+                        if (otherVal === value) isError = true;
+                    }
+                }
+            }
+        }
 
         // Store for undo (including any notes that were on this cell)
         const previousNotes = this.notes.has(tileId) 
@@ -166,6 +188,36 @@ export class GameState {
                             // Only add if not already in clearedNotes (avoid duplicates from row/col)
                             if (!clearedNotes.includes(otherKey)) {
                                 clearedNotes.push(otherKey);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Clear conflicting notes on diagonals (Sudoku X only)
+            if (this.puzzle.specialFlags?.sudokuX) {
+                // Main diagonal (row === col)
+                if (row === col) {
+                    for (let i = 0; i < this.n; i++) {
+                        if (i !== row) {
+                            const otherKey = `${i}-${i}`;
+                            if (this.removeNoteValue(otherKey, value)) {
+                                if (!clearedNotes.includes(otherKey)) {
+                                    clearedNotes.push(otherKey);
+                                }
+                            }
+                        }
+                    }
+                }
+                // Anti-diagonal (row + col === n - 1)
+                if (row + col === this.n - 1) {
+                    for (let i = 0; i < this.n; i++) {
+                        if (i !== row) {
+                            const otherKey = `${i}-${this.n - 1 - i}`;
+                            if (this.removeNoteValue(otherKey, value)) {
+                                if (!clearedNotes.includes(otherKey)) {
+                                    clearedNotes.push(otherKey);
+                                }
                             }
                         }
                     }
@@ -234,6 +286,28 @@ export class GameState {
                     if (r === row && c === col) continue;
                     const otherVal = this.board.get(`${r}-${c}`);
                     if (otherVal === value) return false;
+                }
+            }
+        }
+        
+        // Check if value already exists on same diagonal (Sudoku X only)
+        if (this.puzzle.specialFlags?.sudokuX) {
+            // Main diagonal (row === col)
+            if (row === col) {
+                for (let i = 0; i < this.n; i++) {
+                    if (i !== row) {
+                        const otherVal = this.board.get(`${i}-${i}`);
+                        if (otherVal === value) return false;
+                    }
+                }
+            }
+            // Anti-diagonal (row + col === n - 1)
+            if (row + col === this.n - 1) {
+                for (let i = 0; i < this.n; i++) {
+                    if (i !== row) {
+                        const otherVal = this.board.get(`${i}-${this.n - 1 - i}`);
+                        if (otherVal === value) return false;
+                    }
                 }
             }
         }
