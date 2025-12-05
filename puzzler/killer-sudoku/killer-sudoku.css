@@ -185,6 +185,10 @@
     background-color: #f5b7b1 !important;
 }
 
+.tile-hovered-noting {
+    background-color: rgb(180, 230, 180) !important;
+}
+
 .submit {
     background-color: #e74c3c;
 }
@@ -243,4 +247,32 @@
 .note {
     font-size: 10px;
     color: #000000;
+}
+
+/* ===========================================
+   HINT BUTTON
+   =========================================== */
+
+.hintButton {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: white;
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hintButton img {
+    width: 32px;
+    height: 32px;
+}
+
+.hintButton-hovered {
+    background-color: rgb(255, 235, 180);
 }

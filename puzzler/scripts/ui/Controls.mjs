@@ -84,12 +84,12 @@ export class Controls {
             if (cage) {
                 this.state.hoveredCageCells = cage.cells.map(([r, c]) => `${r}-${c}`);
                 for (const cellId of this.state.hoveredCageCells) {
-                    this.renderer.setTileHovered(cellId, true);
+                    this.renderer.setTileHovered(cellId, true, this.state.isTakingNotes);
                 }
             }
         } else {
             // Default: highlight single tile
-            this.renderer.setTileHovered(tileId, true);
+            this.renderer.setTileHovered(tileId, true, this.state.isTakingNotes);
         }
     }
 
@@ -103,12 +103,12 @@ export class Controls {
         if (this.state.isHoverMode && this.state.hoveredCageCells.length > 0) {
             // Clear all cage cell highlights
             for (const cellId of this.state.hoveredCageCells) {
-                this.renderer.setTileHovered(cellId, false);
+                this.renderer.setTileHovered(cellId, false, this.state.isTakingNotes);
             }
             this.state.hoveredCageCells = [];
         } else {
             // Default: clear single tile
-            this.renderer.setTileHovered(tileId, false);
+            this.renderer.setTileHovered(tileId, false, this.state.isTakingNotes);
         }
     }
 
@@ -373,6 +373,7 @@ export class Controls {
         if (this.state.isTakingNotes) return;
         
         this.state.isTakingNotes = true;
+        this.renderer.setButtonActive('note', true);
         this.renderer.setButtonIcon('note', `${this.renderer.imagePath}/x.png`);
         this.renderer.showNoteModeIndicator(document.getElementById('note-div'));
         this.renderer.addNoteButtons(
@@ -388,6 +389,7 @@ export class Controls {
         if (!this.state.isTakingNotes) return;
         
         this.state.isTakingNotes = false;
+        this.renderer.setButtonActive('note', false);
         this.renderer.setButtonIcon('note', `${this.renderer.imagePath}/pencil.png`);
         this.renderer.hideNoteModeIndicator();
         this.renderer.removeNoteButtons();
@@ -592,6 +594,39 @@ export class Controls {
     toggleHoverMode() {
         const isActive = this.state.toggleHoverMode();
         this.renderer.setButtonActive('hover-btn', isActive);
+    }
+
+    /**
+     * Uses a hint to reveal a random empty cell's correct value
+     * Adds a 1-minute time penalty
+     */
+    useHint() {
+        // Get a random empty tile
+        const tileId = this.state.getRandomEmptyTile();
+        
+        if (!tileId) {
+            alert('No empty cells remaining!');
+            return;
+        }
+        
+        // Confirm with user about penalty
+        if (!confirm('Use hint? This will add 1 minute to your time.')) {
+            return;
+        }
+        
+        // Add time penalty (60 seconds)
+        this.state.addTimePenalty(60);
+        
+        // Get the correct value for this tile
+        const correctValue = this.state.getCorrectValue(tileId);
+        
+        if (correctValue === null) {
+            console.error('Could not get correct value for tile:', tileId);
+            return;
+        }
+        
+        // Place the value as if the user entered it
+        this._placeTileValue(tileId, correctValue);
     }
 
     /**

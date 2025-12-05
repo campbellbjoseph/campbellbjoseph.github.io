@@ -112,6 +112,7 @@ export class KillerSudokuGame {
         const buttonsEl = document.getElementById('buttons');
         const solvingEl = document.getElementById('solving');
         const titleEl = document.getElementById('title');
+        const noteDivEl = document.getElementById('note-div');
         
         // Initialize and render board
         this.renderer.initBoard(boardEl);
@@ -119,6 +120,9 @@ export class KillerSudokuGame {
         
         // Render digits
         this.renderer.renderDigits(digitsEl);
+        
+        // Initialize mode indicator (shows "Entering numbers." by default)
+        this.renderer.initModeIndicator(noteDivEl);
         
         // Render controls
         this.renderer.renderControls(buttonsEl, {
@@ -138,6 +142,7 @@ export class KillerSudokuGame {
                 }
             },
             onHover: () => this.controls.toggleHoverMode(),
+            onHint: () => this.controls.useHint(),
             onReset: () => this.controls.reset()
         });
         

@@ -573,5 +573,49 @@ export class GameState {
             seconds: seconds.toString().padStart(2, '0')
         };
     }
+
+    /**
+     * Adds a time penalty to the timer
+     * @param {number} seconds - Number of seconds to add
+     */
+    addTimePenalty(seconds) {
+        this.pausedTime += seconds;
+    }
+
+    /**
+     * Gets a random empty tile (not filled, not a given)
+     * @returns {string|null} Tile ID in "row-col" format, or null if no empty tiles
+     */
+    getRandomEmptyTile() {
+        const emptyTiles = [];
+        
+        for (let r = 0; r < this.n; r++) {
+            for (let c = 0; c < this.n; c++) {
+                const tileId = `${r}-${c}`;
+                // Skip given cells and filled cells
+                if (this.givenCells.has(tileId)) continue;
+                if (this.board.has(tileId)) continue;
+                
+                emptyTiles.push(tileId);
+            }
+        }
+        
+        if (emptyTiles.length === 0) return null;
+        
+        // Return a random empty tile
+        const randomIndex = Math.floor(Math.random() * emptyTiles.length);
+        return emptyTiles[randomIndex];
+    }
+
+    /**
+     * Gets the correct value for a tile from the solution
+     * @param {string} tileId - "row-col" format
+     * @returns {number|null} The solution value, or null if invalid
+     */
+    getCorrectValue(tileId) {
+        const [row, col] = tileId.split('-').map(Number);
+        if (row < 0 || row >= this.n || col < 0 || col >= this.n) return null;
+        return this.puzzle.solution[row][col];
+    }
 }
 

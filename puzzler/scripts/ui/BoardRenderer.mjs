@@ -278,6 +278,10 @@ export class BoardRenderer {
         const hover = this._createButton('hover-btn', 'hoverButton', `${this.imagePath}/eye.png`, callbacks.onHover);
         container.appendChild(hover);
         
+        // Hint button
+        const hint = this._createButton('hint-btn', 'hintButton', `${this.imagePath}/hint.png`, callbacks.onHint);
+        container.appendChild(hint);
+        
         // Reset button
         const reset = this._createButton('reset', 'reset', `${this.imagePath}/reset.png`, callbacks.onReset);
         container.appendChild(reset);
@@ -508,15 +512,21 @@ export class BoardRenderer {
      * Sets tile hover state
      * @param {string} tileId 
      * @param {boolean} hovered 
+     * @param {boolean} isNoteMode - Whether note mode is active (uses different color)
      */
-    setTileHovered(tileId, hovered) {
+    setTileHovered(tileId, hovered, isNoteMode = false) {
         const tile = document.getElementById(tileId);
         if (!tile) return;
         
         if (hovered) {
-            tile.classList.add('tile-hovered');
+            if (isNoteMode) {
+                tile.classList.add('tile-hovered-noting');
+            } else {
+                tile.classList.add('tile-hovered');
+            }
         } else {
             tile.classList.remove('tile-hovered');
+            tile.classList.remove('tile-hovered-noting');
         }
     }
 
@@ -603,26 +613,42 @@ export class BoardRenderer {
     }
 
     /**
-     * Adds note mode indicator
+     * Initializes the mode indicator (should be called on game start)
      * @param {HTMLElement} container 
      */
-    showNoteModeIndicator(container) {
-        if (document.getElementById('note-taking')) return;
+    initModeIndicator(container) {
+        if (document.getElementById('mode-indicator')) return;
         
         const indicator = document.createElement('div');
-        indicator.id = 'note-taking';
+        indicator.id = 'mode-indicator';
         indicator.style.paddingBottom = '5px';
         indicator.style.fontSize = '25px';
-        indicator.textContent = 'Taking notes.';
+        indicator.textContent = 'Entering numbers.';
         container.appendChild(indicator);
     }
 
     /**
-     * Removes note mode indicator
+     * Shows note mode indicator (changes text to "Taking notes.")
+     * @param {HTMLElement} container 
+     */
+    showNoteModeIndicator(container) {
+        let indicator = document.getElementById('mode-indicator');
+        if (!indicator) {
+            // Create if doesn't exist yet
+            this.initModeIndicator(container);
+            indicator = document.getElementById('mode-indicator');
+        }
+        indicator.textContent = 'Taking notes.';
+    }
+
+    /**
+     * Hides note mode indicator (changes text to "Entering numbers.")
      */
     hideNoteModeIndicator() {
-        const indicator = document.getElementById('note-taking');
-        if (indicator) indicator.remove();
+        const indicator = document.getElementById('mode-indicator');
+        if (indicator) {
+            indicator.textContent = 'Entering numbers.';
+        }
     }
 
     /**

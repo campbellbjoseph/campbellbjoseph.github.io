@@ -190,6 +190,30 @@ img {
     border: 2px solid #0088cc !important;
 }
 
+.hintButton {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    margin: 2px;
+    background-color: white;
+
+    /* Text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hintButton img {
+    width: 32px;
+    height: 32px;
+}
+
+.hintButton-hovered {
+    background-color: rgb(255, 235, 180);
+}
+
 .reset {
     width: 50px;
     height: 50px;
@@ -233,7 +257,7 @@ img {
 }
 
 .tile-hovered-noting {
-    background-color: rgb(174, 130, 217);
+    background-color: rgb(180, 230, 180);
 }
 
 .tile-selected {
