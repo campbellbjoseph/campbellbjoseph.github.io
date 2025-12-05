@@ -257,7 +257,7 @@ img {
 }
 
 .tile-hovered-noting {
-    background-color: rgb(180, 230, 180);
+    background-color: rgb(180, 230, 180) !important;
 }
 
 .tile-selected {

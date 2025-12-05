@@ -223,6 +223,10 @@
     background-color: #dcc8f5 !important;
 }
 
+.tile.diagonal-cell.tile-hovered-noting {
+    background-color: rgb(180, 230, 180) !important;
+}
+
 /* Error state on diagonal cells - red takes priority */
 .tile.diagonal-cell.wrong-tile {
     background-color: rgb(158, 61, 61) !important;
